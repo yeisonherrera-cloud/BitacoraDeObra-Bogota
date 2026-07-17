@@ -286,10 +286,13 @@
   <div class="footer">Desarrollado por ⚡ Obras Manizales ⚡</div>
 
   <script>
+    // ESTA ES LA ÚNICA CONSTANTE QUE DEBE PERMANECER HARDCODEADA EN EL HTML
+    // (Sin esta ruta, la web no sabe a qué base de datos ir a conectarse para descargar el resto de configuraciones)
     const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbxpQxEr3ZXbuv4zmYbhoy7EFchSp2UG0MQHA4Rv-p8rEQWsYt6nQa6VhUc3o5zPOaGw/exec'; 
     
     let dbUsuarios = [];
     let dbProyectos = {};
+    let appConfig = { gruposSST: {}, gruposObra: {} }; // Almacenará la configuración remota
     let usuarioActual = {};
     let archivosQueue = [];
     
@@ -336,28 +339,34 @@
         tx.objectStore('archivos').delete('queue');
     }
 
-    function getTelegramGroupUrl(proyectoNombre, modulo, frente) {
+    // NUEVO SISTEMA: Recupera los IDs del botón de Telegram desde las configuraciones (appConfig) enviadas por el Backend
+    function getTelegramGroupUrl(proyectoNombre, modulo) {
         var nombre = String(proyectoNombre).toUpperCase();
         var mod = String(modulo).toUpperCase();
-        
-        // Lógica actualizada: únicamente enruta hacia SST o hacia OBRA (Actividades)
 
         if (nombre.includes("PERSONAL DISPERSO") || nombre.includes("TODAS LAS OBRAS")) {
             return "https://web.telegram.org/k/";
         }
 
-        if (nombre.includes("MALC") || nombre.includes("ALCAZARES") || nombre.includes("ALCÁZARES")) {
-            if (mod === "SST") return "https://web.telegram.org/k/#-4365952367";
-            return "https://web.telegram.org/k/#-4359038522";
+        var infoProy = dbProyectos[proyectoNombre];
+        if (!infoProy) return "https://web.telegram.org/k/";
+
+        var sigla = infoProy.sigla;
+        var targetId = "";
+        
+        // Asignación con base en Siglas leyendo desde la memoria RAM (AppConfig)
+        if (mod === "SST" && appConfig.gruposSST[sigla]) {
+            targetId = appConfig.gruposSST[sigla];
+        } else if (appConfig.gruposObra[sigla]) {
+            targetId = appConfig.gruposObra[sigla];
         }
-        if (nombre.includes("CF") || nombre.includes("CIUDAD FLORAL")) {
-            if (mod === "SST") return "https://web.telegram.org/k/#-4433927187";
-            return "https://web.telegram.org/k/#-4343222591";
+
+        if (targetId) {
+            // Telegram Web prefiere los IDs sin el prefijo interno "-100" para las URLs
+            var webId = targetId.startsWith("-100") ? targetId.replace("-100", "-") : targetId;
+            return "https://web.telegram.org/k/#" + webId;
         }
-        if (nombre.includes("FDS") || nombre.includes("FORESTA")) {
-            if (mod === "SST") return "https://web.telegram.org/k/#-4387709086";
-            return "https://web.telegram.org/k/#-4405851185";
-        }
+
         return "https://web.telegram.org/k/";
     }
 
@@ -395,6 +404,9 @@
             if (result.estado === 'exito') {
                 dbUsuarios = result.usuarios || [];
                 dbProyectos = result.proyectos || {};
+                
+                // Guardamos la configuración de Telegram que vino desde el Google Sheet
+                appConfig = result.config || { gruposSST: {}, gruposObra: {} };
                 
                 const datalist = document.getElementById('listaNombres');
                 dbUsuarios.forEach(u => {
