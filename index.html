@@ -1,1409 +1,1104 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Elementa Box App</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- === CONTROL DE VERSIÓN PARA AUTO-ACTUALIZACIÓN === -->
+  <meta name="app-version" content="1.0.3">
+  <title>Plataforma de Registro y Captura</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- LIBRERÍA LAMEJS PARA UNIFICAR TODOS LOS AUDIOS A FORMATO MP3 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+
+  <style>
+    :root { --primary: #00f260; --secondary: #0575e6; --bg-dark: #04090b; --card-bg: rgba(10, 15, 18, 0.75); }
+    body { margin: 0; padding: 20px; background: var(--bg-dark); font-family: 'Inter', sans-serif; color: white; text-align: center; overflow-y: auto; overflow-x: hidden; position: relative; scrollbar-width: none; -ms-overflow-style: none; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;}
+    body::-webkit-scrollbar { display: none; }
     
-    <script type="importmap">
-    {
-        "imports": {
-            "react": "https://esm.sh/react@18.2.0",
-            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-            "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime"
-        }
+    .cyber-grid { position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background-image: linear-gradient(rgba(0, 242, 96, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 96, 0.15) 1px, transparent 1px); background-size: 40px 40px; transform: perspective(500px) rotateX(60deg); animation: moveGrid 3s linear infinite; z-index: 0; opacity: 0.6; pointer-events: none; }
+    @keyframes moveGrid { 0% { transform: perspective(500px) rotateX(60deg) translateY(0); } 100% { transform: perspective(500px) rotateX(60deg) translateY(40px); } }
+    body::after { content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%); background-size: 100% 4px; z-index: 100; pointer-events: none; }
+    .ambient-light { position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 40%, rgba(5, 117, 230, 0.15) 0%, transparent 40%), radial-gradient(circle at 70% 60%, rgba(0, 242, 96, 0.1) 0%, transparent 40%); animation: rotateGlow 20s linear infinite; z-index: 1; pointer-events: none; }
+    @keyframes rotateGlow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    @keyframes fadeSlideUp { 0% { opacity: 0; transform: translateY(20px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+    .card { width: 100%; max-width: 420px; position: relative; z-index: 10; background: var(--card-bg); padding: 35px 25px; border-radius: 20px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; border: 1px solid rgba(0, 242, 96, 0.1); box-sizing: border-box; display: none; margin-bottom: 20px;}
+    .card.active { display: block; }
+    .card.is-processing { border-color: rgba(0, 242, 96, 0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 40px rgba(0, 242, 96, 0.08), inset 0 1px 0 rgba(255,255,255,0.2); }
+    
+    .input-group { margin-bottom: 18px; text-align: left; }
+    label { display: block; font-size: 11px; font-weight: 700; color: #a0aec0; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px;}
+    
+    input[type="text"], input[type="number"], input[type="password"], input[type="email"], input:not([type]), select, textarea { 
+      width: 100%; padding: 14px; background: rgba(0, 0, 0, 0.6); 
+      border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; 
+      box-sizing: border-box; font-size: 14px; 
+      color: #ffffff !important; 
+      font-family: 'Inter', sans-serif; transition: all 0.3s; 
+      text-transform: uppercase;
     }
-    </script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-</head>
-<body class="bg-[#E5D3BD] font-sans text-brand-dark min-h-[100dvh]">
+    input[type="text"], input[type="password"], input[type="email"], input:not([type]), select {
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    textarea { text-transform: none; resize: vertical; }
     
-    <div class="fixed inset-0 z-0 pointer-events-none">
-        <div class="absolute top-0 -left-10 w-72 h-72 bg-[#f4e6d4] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-        <div class="absolute top-40 right-0 w-80 h-80 bg-[#cbb092] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" style="animation-delay: 2s;"></div>
-        <div class="absolute -bottom-20 left-20 w-96 h-96 bg-[#dfc5a6] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" style="animation-delay: 4s;"></div>
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 242, 96, 0.2); background: rgba(0, 0, 0, 0.8); }
+    select option { background: #0f172a; color: white; }
+    input[type="password"] { text-transform: none; }
+    input:read-only { background: rgba(255, 255, 255, 0.03); color: #94a3b8 !important; border-color: rgba(255, 255, 255, 0.05); cursor: not-allowed; }
+
+    input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active{
+        -webkit-box-shadow: 0 0 0 30px #080d10 inset !important; 
+        -webkit-text-fill-color: #ffffff !important; 
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
+    .btn-action { width: 100%; position: relative; overflow: hidden; margin-top: 10px; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; font-family: 'Inter', sans-serif; cursor: pointer; box-shadow: 0 4px 15px rgba(5, 117, 230, 0.3); transition: all 0.3s ease; text-transform: uppercase; }
+    .btn-action:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(5, 117, 230, 0.5); }
+    .btn-action:active { transform: scale(0.98); }
+    
+    .btn-foto { background: rgba(5, 150, 105, 0.1); border: 1px solid #059669; color: #34d399; }
+    .btn-foto:hover { background: #059669; color: white; }
+    .btn-video { background: rgba(124, 58, 237, 0.1); border: 1px solid #7c3aed; color: #a78bfa; }
+    .btn-video:hover { background: #7c3aed; color: white; }
+    .btn-galeria { background: rgba(14, 165, 233, 0.1); border: 1px solid #0ea5e9; color: #38bdf8; }
+    .btn-galeria:hover { background: #0ea5e9; color: white; }
+    .btn-error { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 4px 15px rgba(255, 75, 43, 0.3); }
+    .btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
+    .btn-telegram { background: linear-gradient(135deg, #0088cc, #005580); box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3); }
+    
+    .btn-audio-grabando { background: linear-gradient(135deg, #ff416c, #ff4b2b); animation: pulseRecord 1.5s infinite; }
+    @keyframes pulseRecord { 0% { box-shadow: 0 0 0 0 rgba(255, 65, 108, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 65, 108, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 65, 108, 0); } }
+
+    .logo-wrapper { position: relative; display: inline-block; margin-bottom: 25px; }
+    .logo-wrapper img { width: 150px; border-radius: 12px; display: block; animation: float 4s ease-in-out infinite, pulseGlow 3s alternate infinite; }
+    .matrix-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; overflow: hidden; opacity: 0; z-index: 15; background: rgba(0, 15, 5, 0.9); box-shadow: inset 0 0 20px rgba(0, 242, 96, 0.5); pointer-events: none; }
+    .is-processing .matrix-overlay { animation: matrixPulse 4.5s infinite; }
+    .matrix-overlay::before, .matrix-overlay::after { content: "10100110 01100101 10101011 00101001 10010100 01110011 11010101 01010100 11001100 10101011 01100101 10101011 00101001 10010100 01110011 11010101 01010100 11001100 10101011 01100101 10101011 00101001 10010100 01110011 11010101 01010100 11001100 10101011 01100101 10101011 00101001 10010100 01110011 11010101 01010100 11001100 10101011 01100101"; position: absolute; top: -100%; left: 0; width: 100%; color: #00ff41; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 12px; word-break: break-all; animation: matrixRain 3s linear infinite; }
+    @keyframes matrixPulse { 0%, 15% { opacity: 0; } 40%, 60% { opacity: 1; } 85%, 100% { opacity: 0; } }
+    @keyframes matrixRain { 0% { top: -50%; } 100% { top: 0%; } }
+    .is-processing img { animation: float 4s ease-in-out infinite, glitchMatrixExtremo 4.5s infinite; }
+    @keyframes glitchMatrixExtremo { 0%, 35% { opacity: 1; transform: scale(1) translate(0); filter: none; } 36% { transform: translate(-4px, 2px); } 38% { transform: translate(4px, -2px); } 40%, 60% { opacity: 0; transform: scale(0.95); } 82% { transform: translate(-3px, 1px); } 84% { transform: translate(3px, -1px); } 86%, 100% { opacity: 1; transform: scale(1) translate(0); } }
+    
+    .message { margin: 15px 0; min-height: 20px; font-size: 14.5px; color: #00f260; font-family: 'JetBrains Mono', monospace; font-weight: 500; text-shadow: 0 0 5px rgba(0, 242, 96, 0.4); }
+    .progress-container { width: 100%; background: rgba(0,0,0,0.6); border-radius: 50px; overflow: hidden; height: 22px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.1); position: relative; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); text-align: right; padding-right: 12px; box-sizing: border-box; line-height: 22px; font-size: 12px; font-weight: 700; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5); transition: width 0.8s; }
+
+    h2 { margin-top: 0; font-size: 22px; font-weight: 700; background: -webkit-linear-gradient(#fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .text-sm { font-size: 12px; color: #94a3b8; margin-top: 15px; display: block; }
+    .link { color: var(--primary); cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+    #cronometro { font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #ff4b2b; text-shadow: 0 0 10px rgba(255, 75, 43, 0.5); margin: 10px 0; display: none; }
+    input[type="file"] { display: none !important; }
+    
+    .queue-container { margin-top: 25px; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.2); text-align: left;}
+    .queue-item { background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 8px; font-size: 13px; font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--primary);}
+    .queue-item.foto { border-left-color: #34d399; }
+    .queue-item.video { border-left-color: #a78bfa; }
+    .queue-item.audio { border-left-color: #ff4b2b; }
+    .queue-item.failed-item { border-left-color: #ff4b2b; background: rgba(255, 75, 43, 0.15); border: 1px solid rgba(255, 75, 43, 0.3); border-left: 3px solid #ff4b2b; }
+    .btn-remove { background: none; border: none; color: #ff4b2b; cursor: pointer; font-size: 18px; font-weight: bold; }
+    
+    .footer { position: relative; margin-top: 25px; width: 100%; text-align: center; font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 4px; text-transform: uppercase; font-weight: 700; z-index: 10; padding-bottom: 20px;}
+
+    .modulo-badge {
+        position: absolute; 
+        top: 20px; 
+        right: 20px; 
+        color: white; 
+        padding: 6px 12px; 
+        border-radius: 12px; 
+        font-size: 11px; 
+        font-weight: 800; 
+        letter-spacing: 1px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4); 
+        border: 1px solid rgba(255,255,255,0.2); 
+        z-index: 100; 
+        display: none;
+    }
+
+    /* === ESTILO PARA EL BANNER DE ACTUALIZACIÓN === */
+    #updateBanner {
+        position: fixed; top: 0; left: 0; width: 100%; 
+        background: linear-gradient(135deg, #f59e0b, #d97706); 
+        color: white; text-align: center; padding: 14px; 
+        font-size: 13px; font-weight: 700; z-index: 99999; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: none; 
+        cursor: pointer; text-transform: uppercase; 
+        font-family: 'Inter', sans-serif;
+    }
+    #updateBanner:hover { background: linear-gradient(135deg, #d97706, #b45309); }
+
+    /* === NUEVO: SISTEMA DE NOTIFICACIONES TOAST (REEMPLAZO DE ALERT) === */
+    #toastNotification {
+        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+        background: linear-gradient(135deg, #ff416c, #ff4b2b);
+        color: white; padding: 12px 24px; border-radius: 12px;
+        font-size: 14px; font-weight: 700; z-index: 999999;
+        box-shadow: 0 10px 30px rgba(255, 75, 43, 0.5);
+        opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        text-align: center; max-width: 90%; word-wrap: break-word;
+    }
+    #toastNotification.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <!-- BANNER DE ACTUALIZACIÓN VISUAL -->
+  <div id="updateBanner" onclick="window.location.reload(true)">🚀 Nueva versión disponible. Toca aquí para actualizar 🚀</div>
+  
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastNotification">Mensaje de prueba</div>
+
+  <div class="cyber-grid"></div>
+  <div class="ambient-light"></div>
+
+  <div class="card active" id="vistaLoader">
+    <div class="logo-wrapper">
+      <img src="https://lh3.googleusercontent.com/d/1TsBi-7jTXIUG4j9uNDBDu5gwxoTrHUq7" onerror="this.style.display='none'" alt="Logo">
+      <div class="matrix-overlay"></div>
+    </div>
+    <h2 id="loaderTitle">Iniciando Sistema</h2>
+    <div class="message" id="message" data-current="">Conectando con base de datos...</div>
+    <div class="progress-container"><div class="progress-bar" id="progressBar">0%</div></div>
+    <button id="btnErrorLoader" class="btn-action btn-error" style="display:none;" onclick="volverDeError()">Cerrar y Revisar</button>
+    <button id="btnExitoLoader" class="btn-action" style="display:none; background: linear-gradient(135deg, #00f260, #0575e6);" onclick="volverDeExito()">Continuar</button>
+  </div>
+
+  <div class="card" id="vistaLogin">
+    <h2>Sistema de Control</h2>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 25px;">Identificación de Personal Autorizado</p>
+    
+    <div class="input-group">
+      <label>USUARIO</label>
+      <input type="text" list="listaNombres" id="loginNombre" placeholder="Buscar nombre..." autocomplete="off">
+      <datalist id="listaNombres"></datalist>
+    </div>
+    <div class="input-group">
+      <label>CONTRASEÑA</label>
+      <input type="password" id="loginPassword" placeholder="••••••••">
     </div>
 
-    <div id="root" class="relative z-10 min-h-screen"></div>
+    <button class="btn-action" onclick="iniciarSesion()">ACCEDER AL SISTEMA</button>
+    <span class="text-sm">¿No tienes cuenta? <span class="link" onclick="cambiarVista('vistaRegistro')">Solicitar Registro</span></span>
+  </div>
 
-    <script type="text/babel" data-type="module">
-        import React, { useState, useEffect, useMemo } from 'react';
-        import { createRoot } from 'react-dom/client';
+  <div class="card" id="vistaRegistro">
+    <h2>Nuevo Personal</h2>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Ingrese sus datos. El sistema validará su registro.</p>
+    
+    <div class="input-group">
+      <label>NOMBRE COMPLETO</label>
+      <input type="text" id="regNombre" placeholder="Nombres y Apellidos">
+    </div>
+    <div class="input-group">
+      <label>CÉDULA</label>
+      <input type="text" id="regCedula" placeholder="Número de documento">
+    </div>
+    <div class="input-group">
+      <label>CORREO ELECTRÓNICO</label>
+      <input type="email" id="regCorreo" placeholder="ejemplo@galias.com.co">
+    </div>
+    <div class="input-group">
+      <label>CARGO</label>
+      <input type="text" id="regCargo" placeholder="Ej. Maestro de Obra">
+    </div>
+    <div class="input-group">
+      <label>PROYECTO ASIGNADO</label>
+      <select id="regProyecto"></select>
+    </div>
 
-        const Icons = {
-            ElementaLogo: (p) => (
-                <svg {...p} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="46" stroke="currentColor" strokeWidth="6"/>
-                    <path d="M12 25 L88 88" stroke="currentColor" strokeWidth="6" strokeLinecap="round"/>
-                    <path d="M12 75 L88 12" stroke="currentColor" strokeWidth="6" strokeLinecap="round"/>
-                    <path d="M50 14 C58 24 64 30 64 40 C64 48 58 50 50 50 C42 50 36 48 36 40 C36 30 42 24 50 14 Z" fill="currentColor"/>
-                    <path d="M50 24 C54 30 58 34 58 40 C58 44 54 46 50 46 C46 46 42 44 42 40 C42 34 46 30 50 24 Z" fill="currentColor"/>
-                    <path d="M60 55 C70 50 78 50 85 58 C85 68 75 70 65 75 C60 77 55 75 60 55 Z" fill="currentColor"/>
-                    <path d="M65 65 C70 62 75 62 80 65 C80 68 75 70 68 70 C65 70 63 68 65 65 Z" fill="currentColor"/>
-                    <path d="M35 85 L50 60 L65 85 Z" fill="currentColor"/>
-                    <path d="M42 85 L50 72 L58 85 Z" fill="currentColor"/>
-                    <path d="M20 50 C30 45 40 45 45 50 M15 60 C25 55 35 55 40 60 M25 40 C32 37 38 37 42 40" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
-                </svg>
-            ),
-            Home: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
-            Play: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>,
-            BookOpen: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-            Users: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-            LogOut: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-            Activity: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
-            Video: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>,
-            Search: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
-            ChevronDown: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
-            ChevronUp: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>,
-            X: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
-            Trophy: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>,
-            AlertCircle: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
-            Clock: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-            Target: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
-            Camera: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>,
-            Upload: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
-            Database: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
-            ExternalLink: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
-            Dumbbell: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="m14 6.5-4 11"/><path d="M4.5 5v14"/><path d="M19.5 5v14"/><path d="M2 7h3"/><path d="M2 17h3"/><path d="M19 7h3"/><path d="M19 17h3"/></svg>,
-            Calendar: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
-            CheckCircle: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        };
-        const { ElementaLogo, Home, Play, BookOpen, Users, LogOut, Activity, Video, Search, ChevronDown, ChevronUp, X, Trophy, AlertCircle, Clock, Target, Camera, Upload, Database, ExternalLink, Dumbbell, Calendar, CheckCircle } = Icons;
+    <button class="btn-action" onclick="registrarUsuario()">ENVIAR SOLICITUD</button>
+    <button class="btn-action" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="cambiarVista('vistaLogin')">Volver al Inicio</button>
+  </div>
 
-        const customStyles = `
-        :root { --color-brand-bg1: 229 211 189; --color-brand-bg2: 212 188 160; --color-brand-dark: 42 36 31; }
-        .bg-brand-bg1 { background-color: rgb(var(--color-brand-bg1)); }
-        .bg-brand-dark { background-color: rgb(var(--color-brand-dark)); }
-        .text-brand-bg1 { color: rgb(var(--color-brand-bg1)); }
-        .text-brand-dark { color: rgb(var(--color-brand-dark)); }
-        .border-brand-dark { border-color: rgb(var(--color-brand-dark)); }
-        .glass-card { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 15px 35px -5px rgba(0,0,0,0.15); }
-        .modal-overlay { background: rgba(10, 8, 7, 0.95); backdrop-filter: blur(10px); }
-        .hide-scroll::-webkit-scrollbar { display: none; }
+  <div class="card" id="vistaReasignar">
+    <h2 style="color: #f59e0b;">Cuenta Existente</h2>
+    <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">
+      Ya existe una cuenta en el sistema vinculada a ese número de documento. <br><br>
+      ¿Deseas solicitarle al administrador que te <b>reasigne una contraseña</b>?
+    </p>
+    
+    <div class="input-group">
+      <label>NUEVO CORREO ELECTRÓNICO (Opcional)</label>
+      <input type="email" id="reasignarCorreo" placeholder="Llenar solo si tu correo cambió">
+    </div>
+
+    <button class="btn-action btn-warning" onclick="enviarReasignacion()">SÍ, SOLICITAR CONTRASEÑA</button>
+    <button class="btn-action" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="cambiarVista('vistaRegistro')">CANCELAR (ME EQUIVOQUÉ)</button>
+  </div>
+
+  <div class="card" id="vistaApp" style="max-width: 480px;">
+    <div id="badgeModulo" class="modulo-badge">OBRA</div>
+    
+    <h2>Módulo de Reporte</h2>
+    <div style="background: rgba(0,242,96,0.1); padding: 12px; border-radius: 10px; margin-bottom: 20px; text-align: left; border-left: 3px solid var(--primary);">
+        <span id="infoUsuarioNombre" style="font-size: 15px; font-weight: 700; color: white;">NOMBRE</span><br>
+        <span id="infoUsuarioCedula" style="font-size: 12px; color: #a0aec0; font-family: 'JetBrains Mono';">CC: 000000000</span><br>
+        <span id="infoUsuarioCorreo" style="font-size: 12px; color: #a0aec0; font-family: 'JetBrains Mono';">correo@empresa.com</span>
+    </div>
+    
+    <div class="input-group">
+      <label>PROYECTO ACTUAL</label>
+      <select id="appProyecto" onchange="actualizarFrentes()"></select>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="input-group">
+          <label>FRENTE</label>
+          <select id="appFrente"><option value="">Seleccione...</option></select>
+        </div>
+        <div class="input-group">
+          <label>UBICACIÓN</label>
+          <input type="text" id="appUbicacion" placeholder="Ej. Zanja Norte">
+        </div>
+    </div>
+
+    <div class="input-group" style="margin-top: 18px;">
+      <label>DESCRIPCIÓN / OBSERVACIONES</label>
+      <textarea id="appDescripcion" rows="3" placeholder="Detalles de la labor, novedades, observaciones..."></textarea>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <input type="file" id="inputFoto" accept="image/*" capture="environment">
+        <button class="btn-action btn-foto" onclick="document.getElementById('inputFoto').click()" style="margin-top: 0;">📸 TOMAR FOTO</button>
         
-        @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
-        .animate-blob { animation: blob 10s infinite; }
-        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } } .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes slideUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } } .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes zoomIn { 0% { opacity: 0; transform: scale(0.95) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } } .animate-zoom-in { animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        <input type="file" id="inputVideo" accept="video/*" capture="environment">
+        <button class="btn-action btn-video" onclick="document.getElementById('inputVideo').click()" style="margin-top: 0;">🎥 GRABAR VIDEO</button>
+    </div>
+    
+    <input type="file" id="inputGaleria" accept="image/*,video/*" multiple>
+    <button class="btn-action btn-galeria" onclick="document.getElementById('inputGaleria').click()" style="margin-top: 0; margin-bottom: 10px;">📁 ADJUNTAR DE GALERÍA</button>
+
+    <button id="btnGrabarAudio" class="btn-action" style="margin-top: 0;">🎤 GRABAR AUDIO</button>
+    <div id="cronometro">00:00</div>
+
+    <div class="queue-container">
+        <label style="color:white; margin-bottom: 10px;">ARCHIVOS EN ESPERA (<span id="queueCount">0</span>)</label>
+        <div id="queueList" style="font-size: 13px; color: #94a3b8; font-style: italic;">No hay archivos pendientes.</div>
+        <button id="btnEnviarReporte" class="btn-action" style="margin-top: 20px; display: none;" onclick="enviarReporteEnCola()">🚀 CONFIRMAR Y ENVIAR</button>
+    </div>
+
+    <div style="margin-top: 25px; text-align: center;">
+        <span class="link text-sm" style="color: #ff6b6b; margin-top:0;" onclick="cerrarSesion()">Cerrar Sesión</span>
+    </div>
+  </div>
+
+  <div class="footer">Desarrollado por ⚡ Obras Manizales ⚡</div>
+
+  <script>
+    const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbxpQxEr3ZXbuv4zmYbhoy7EFchSp2UG0MQHA4Rv-p8rEQWsYt6nQa6VhUc3o5zPOaGw/exec'; 
+    
+    let dbUsuarios = [];
+    let dbProyectos = {};
+    let usuarioActual = {};
+    let archivosQueue = [];
+    
+    let simuladorEnMarcha;
+    let ultimaVista = 'vistaLogin';
+    let cedulaParaReasignar = "";
+
+    /* === HELPER NOTIFICACIONES === */
+    let toastTimeout;
+    function showToast(msg) {
+        const toast = document.getElementById('toastNotification');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    let dbArchivos;
+    function initDB() {
+        return new Promise((resolve) => {
+            const req = indexedDB.open('GaliasArchivosDB', 1);
+            req.onupgradeneeded = e => e.target.result.createObjectStore('archivos');
+            req.onsuccess = e => { dbArchivos = e.target.result; resolve(); };
+            req.onerror = () => resolve(); 
+        });
+    }
+    function guardarArchivosEnIndexedDB(cola) {
+        if(!dbArchivos) return;
+        const tx = dbArchivos.transaction('archivos', 'readwrite');
+        tx.objectStore('archivos').put(cola, 'queue');
+    }
+    function cargarArchivosDeIndexedDB() {
+        return new Promise(resolve => {
+            if(!dbArchivos) return resolve([]);
+            const tx = dbArchivos.transaction('archivos', 'readonly');
+            const req = tx.objectStore('archivos').get('queue');
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => resolve([]);
+        });
+    }
+    function borrarArchivosDeIndexedDB() {
+        if(!dbArchivos) return;
+        const tx = dbArchivos.transaction('archivos', 'readwrite');
+        tx.objectStore('archivos').delete('queue');
+    }
+
+    function getTelegramGroupUrl(proyectoNombre, modulo, frente) {
+        var nombre = String(proyectoNombre).toUpperCase();
+        var mod = String(modulo).toUpperCase();
         
-        @keyframes videogame-pulse {
-            0%, 100% { transform: scale(1.05); box-shadow: 0 0 10px currentColor; }
-            50% { transform: scale(1.15); box-shadow: 0 0 20px currentColor; }
-        }
-        .band-btn { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .videogame-active { animation: videogame-pulse 1.5s infinite; z-index: 10; }
+        // Lógica actualizada: únicamente enruta hacia SST o hacia OBRA (Actividades)
 
-        @keyframes btn-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.6); transform: scale(1); }
-            50% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); transform: scale(1.05); }
-            100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); transform: scale(1); }
-        }
-        .btn-puntos {
-            animation: btn-pulse 2.5s infinite;
-            background: linear-gradient(135deg, #fff, rgb(var(--color-brand-bg1)));
-            border: 2px solid #eab308;
-            color: #854d0e;
+        if (nombre.includes("PERSONAL DISPERSO") || nombre.includes("TODAS LAS OBRAS")) {
+            return "https://web.telegram.org/k/";
         }
 
-        /* Colores exactos para el Nivel Oficial (Sólido) y Nivel Pendiente (Outline) */
-        .bg-band-azul { background-color: #3b82f6; color: white; border-color: #3b82f6; }
-        .bg-band-verde { background-color: #22c55e; color: white; border-color: #22c55e; }
-        .bg-band-morada { background-color: #9333ea; color: white; border-color: #9333ea; }
-        .bg-band-negra { background-color: #1f2937; color: white; border-color: #1f2937; }
-        .bg-band-roja { background-color: #ef4444; color: white; border-color: #ef4444; }
-        .bg-band-sin { background-color: #eab308; color: white; border-color: #eab308; }
+        if (nombre.includes("MALC") || nombre.includes("ALCAZARES") || nombre.includes("ALCÁZARES")) {
+            if (mod === "SST") return "https://web.telegram.org/k/#-4365952367";
+            return "https://web.telegram.org/k/#-4359038522";
+        }
+        if (nombre.includes("CF") || nombre.includes("CIUDAD FLORAL")) {
+            if (mod === "SST") return "https://web.telegram.org/k/#-4433927187";
+            return "https://web.telegram.org/k/#-4343222591";
+        }
+        if (nombre.includes("FDS") || nombre.includes("FORESTA")) {
+            if (mod === "SST") return "https://web.telegram.org/k/#-4387709086";
+            return "https://web.telegram.org/k/#-4405851185";
+        }
+        return "https://web.telegram.org/k/";
+    }
 
-        .border-band-azul { border-color: #3b82f6; color: #3b82f6; box-shadow: inset 0 0 8px rgba(59, 130, 246, 0.2); }
-        .border-band-verde { border-color: #22c55e; color: #22c55e; box-shadow: inset 0 0 8px rgba(34, 197, 94, 0.2); }
-        .border-band-morada { border-color: #9333ea; color: #9333ea; box-shadow: inset 0 0 8px rgba(147, 51, 234, 0.2); }
-        .border-band-negra { border-color: #1f2937; color: #1f2937; box-shadow: inset 0 0 8px rgba(31, 41, 55, 0.2); }
-        .border-band-roja { border-color: #ef4444; color: #ef4444; box-shadow: inset 0 0 8px rgba(239, 68, 68, 0.2); }
-        .border-band-sin { border-color: #eab308; color: #eab308; box-shadow: inset 0 0 8px rgba(234, 179, 8, 0.2); }
-        `;
+    function abrirTelegram(url) {
+        var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        var isAndroid = /android/i.test(userAgent);
+        var isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
 
-        // URL DE APPS SCRIPT OFICIAL ACTUALIZADA
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRNhYyhiWShaATM3XS2pvAufqmKnUlSvIrT8nLg_i9RrlSxtJXUGIJGORvaFs2QA/exec";
-
-        const OPCIONES_OBSERVACION = [
-            'Evidencia no corresponde al reto asignado',
-            'No se puede determinar la realización del reto',
-            'Imagen Borrosa / irreconocible',
-            'Aprobado.'
-        ];
-
-        const nivelesGimnasiaList = [
-            { nivel: 'Nivel 1', color: 'azul', label: 'Banda Azul' },
-            { nivel: 'Nivel 2', color: 'verde', label: 'Banda Verde' },
-            { nivel: 'Nivel 3', color: 'morada', label: 'Banda Morada' },
-            { nivel: 'Nivel 4', color: 'negra', label: 'Banda Negra' },
-            { nivel: 'Nivel 5', color: 'roja', label: 'Banda Roja' },
-            { nivel: 'Nivel 6', color: 'sin', label: 'Sin Banda' },
-        ];
-
-        const movimientosGimnasia = [
-            'PULL UPS', 'KIPPING PULL UP', 'BUTTERFLY PULL UP', 'CHEST TO BAR', 
-            'BUTTERFLY CHEST TO BAR', 'EXPLOSIVE PULL UP', 'HIGH PULL UP', 
-            'KIPPING MUSCLE UP', 'BUTTERFLY MUSCLE UP', 'STRICT MUSCLE UP'
-        ];
-        
-        const movimientosLevantamiento = [
-            'Snatch', 'Hang Power Snatch', 'Power Snatch', 'Hang Squat Snatch', 
-            'Full Snatch (Squat Snatch)', 'Clean & Jerk'
-        ];
-
-        const gimLevels = ['azul', 'verde', 'morada', 'negra', 'roja', 'sin'];
-
-        const defaultSkills = {};
-        movimientosGimnasia.forEach(m => defaultSkills[m] = 'azul');
-        movimientosLevantamiento.forEach(m => defaultSkills[m] = 0);
-
-        const getProp = (obj, propName) => {
-            if (!obj) return undefined;
-            const key = Object.keys(obj).find(k => k.trim().toLowerCase() === propName.trim().toLowerCase());
-            return key ? obj[key] : undefined;
-        };
-
-        const apiCall = async (action, payload) => {
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action, payload })
-                });
-                return await response.json();
-            } catch (error) {
-                return { status: 'error', message: 'Error de conexión. Revisa tu internet o contacta al administrador.' };
-            }
-        };
-
-        const getVideoData = (url) => {
-            if (!url) return { type: null, id: null };
-            const safeUrl = String(url);
-            const ytRegex = new RegExp("^.*(youtu\\.be\\/|v\\/|u\\/\\w\\/|embed\\/|watch\\?v=|\\&v=)([^#\\&\\?]*).*");
-            const ytMatch = safeUrl.match(ytRegex);
-            if (ytMatch && ytMatch[2].length === 11) return { type: 'youtube', id: ytMatch[2] };
-            const driveRegex = new RegExp("(?:\\/d\\/|id=)([a-zA-Z0-9_-]+)");
-            const driveMatch = safeUrl.match(driveRegex);
-            if (driveMatch) return { type: 'drive', id: driveMatch[1] };
-            return { type: null, id: null };
-        };
-
-        // PARSER PARA CONVERTIR ENLACES DE GOOGLE DRIVE A IMÁGENES MOSTRABLES
-        const getDirectImageUrl = (url) => {
-            if (!url) return null;
-            if (url.includes('drive.google.com')) {
-                const match = url.match(/[-\w]{25,}/);
-                if (match) return `https://lh3.googleusercontent.com/d/${match[0]}`;
-            }
-            return url;
-        };
-
-        const formatearFecha = (fechaString) => {
-            if (!fechaString) return 'N/A';
-            const date = new Date(fechaString);
-            if(isNaN(date.getTime())) return String(fechaString);
-            const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
-            const d = String(utcDate.getDate()).padStart(2, '0');
-            const m = String(utcDate.getMonth() + 1).padStart(2, '0');
-            const y = utcDate.getFullYear();
-            return `${d}/${m}/${y}`;
-        };
-
-        const getBase64 = (file) => {
-            return new Promise((resolve, reject) => {
-                if (!file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = error => reject(error);
-                    return;
+        if (isAndroid) {
+            var intentUrl = url.replace("https://", "intent://") + "#Intent;package=org.telegram.messenger;scheme=https;end;";
+            window.location.href = intentUrl;
+        } else if (isIOS) {
+            var start = Date.now();
+            setTimeout(function() {
+                if (Date.now() - start < 1500) {
+                    window.location.href = "https://apps.apple.com/app/telegram-messenger/id686449807";
                 }
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = event => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 1024;
-                        let width = img.width; let height = img.height;
-                        if (width > MAX_WIDTH) { height = Math.round((height * MAX_WIDTH) / width); width = MAX_WIDTH; }
-                        canvas.width = width; canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.65));
-                    };
-                };
-                reader.onerror = error => reject(error);
+            }, 1000);
+            window.location.href = "tg://";
+        } else {
+            window.open(url, '_blank');
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        mostrarLoader("Iniciando Sistema");
+        await initDB(); 
+        try {
+            const response = await fetch(URL_APPS_SCRIPT, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'init' })
             });
-        };
-
-        const GlobalLoader = () => (
-            <div className="fixed inset-0 z-[99999] bg-[#E5D3BD] flex flex-col items-center justify-center animate-fade-in">
-                <video src="https://drive.google.com/uc?export=download&id=1_6UqArGQtjN-61mWhs5MoAy1QlBzZoMA" autoPlay loop muted playsInline className="w-64 h-64 object-contain mix-blend-multiply mb-6 pointer-events-none"></video>
-                <div className="text-brand-dark font-black uppercase tracking-widest text-lg animate-pulse flex items-center gap-2 bg-white/30 px-6 py-2 rounded-full backdrop-blur-sm shadow-sm">
-                    <div className="w-5 h-5 border-4 border-brand-dark border-t-transparent rounded-full animate-spin"></div>
-                    Sincronizando...
-                </div>
-            </div>
-        );
-
-        function App() {
-            const [user, setUser] = useState(null); 
-            const [currentView, setCurrentView] = useState('login'); 
-            const [loading, setLoading] = useState(false);
-            const [dataLoading, setDataLoading] = useState(false);
-            const [errorMsg, setErrorMsg] = useState('');
-            const [successMsg, setSuccessMsg] = useState('');
-
-            const [videos, setVideos] = useState([]);
-            const [blogPosts, setBlogPosts] = useState([]);
-            const [misPuntos, setMisPuntos] = useState(0);
-            const [retosList, setRetosList] = useState([]);
-            const [rankingList, setRankingList] = useState([]);
-            const [wodsList, setWodsList] = useState([]); 
+            const result = await response.json();
             
-            const [searchTerm, setSearchTerm] = useState('');
-            const [expandedCategories, setExpandedCategories] = useState({});
-            const [selectedPost, setSelectedPost] = useState(null); 
-            const [selectedVideo, setSelectedVideo] = useState(null); 
-            const [uploadingReto, setUploadingReto] = useState(null);
-            const [previewFiles, setPreviewFiles] = useState([]);
-
-            const [skillTab, setSkillTab] = useState('gimnasia'); 
-            const [userSkills, setUserSkills] = useState(defaultSkills); 
-            const [maxSkills, setMaxSkills] = useState(defaultSkills);
-            const [pendingSkills, setPendingSkills] = useState({});
-            const [history, setHistory] = useState([]);
-
-            const [adminTab, setAdminTab] = useState('evidencias'); 
-            const [adminSheetData, setAdminSheetData] = useState([]);
-            const [editingPayment, setEditingPayment] = useState(null);
-            const [adminEvidencias, setAdminEvidencias] = useState([]);
-            const [adminEvalEvidencia, setAdminEvalEvidencia] = useState(null);
-
-            useEffect(() => {
-                const sessionUser = localStorage.getItem('elementsSessionV9');
-                if(sessionUser) {
-                    const parsedUser = JSON.parse(sessionUser);
-                    setUser(parsedUser);
-                    setCurrentView('home'); 
-                    loadAppData(parsedUser);
-                }
-            }, []);
-
-            const loadAppData = async (currentUser) => {
-                setDataLoading(true);
-                const res = await apiCall('getData', { 
-                    role: currentUser.role, 
-                    cedula: currentUser.cedula,
-                    email: currentUser.correo
-                });
+            if (result.estado === 'exito') {
+                dbUsuarios = result.usuarios || [];
+                dbProyectos = result.proyectos || {};
                 
-                if (res.status === 'success') {
-                    setVideos(res.videos || []);
-                    setBlogPosts(res.blog || []);
-                    setRetosList(res.retos || []);
-                    setMisPuntos(res.misPuntos || 0);
-                    setRankingList(res.ranking || []);
-                    setWodsList(res.wods || []); 
+                const datalist = document.getElementById('listaNombres');
+                dbUsuarios.forEach(u => {
+                    let option = document.createElement('option');
+                    option.value = u.nombre;
+                    datalist.appendChild(option);
+                });
 
-                    let loadedSkills = { ...defaultSkills };
-                    if (res.misSkills && typeof res.misSkills === 'object') {
-                        loadedSkills = { ...loadedSkills, ...res.misSkills };
-                    }
-                    setMaxSkills(loadedSkills); 
-                    
-                    const pendientes = res.misSkillsPendientes || {};
-                    setPendingSkills(pendientes);
-                    setHistory(res.misEvidencias || []);
+                const selProyReg = document.getElementById('regProyecto');
+                Object.keys(dbProyectos).forEach(p => {
+                    let opt1 = document.createElement('option'); opt1.value = p; opt1.text = p;
+                    selProyReg.appendChild(opt1);
+                });
 
-                    let uiSkills = { ...loadedSkills };
-                    for(let mov in pendientes) {
-                        if (gimLevels.includes(pendientes[mov])) {
-                            if (gimLevels.indexOf(pendientes[mov]) > gimLevels.indexOf(uiSkills[mov] || 'azul')) {
-                                uiSkills[mov] = pendientes[mov];
-                            }
-                        } else if (!isNaN(pendientes[mov])) {
-                            if (Number(pendientes[mov]) > Number(uiSkills[mov] || 0)) {
-                                uiSkills[mov] = pendientes[mov];
-                            }
-                        }
-                    }
-                    setUserSkills(uiSkills);
-
-                    if (res.videos && res.videos.length > 0) {
-                        const firstCat = getProp(res.videos[0], 'Categoria') || 'N1';
-                        setExpandedCategories({ [firstCat]: true });
-                    }
-
-                    if (currentUser.role === 'admin') {
-                        setAdminSheetData(res.adminSheet || []);
-                        setAdminEvidencias(res.adminEvidencias || []);
-                    }
+                clearInterval(simuladorEnMarcha);
+                document.getElementById("vistaLoader").classList.remove("is-processing");
+                
+                const cachedUser = localStorage.getItem('usuarioActual');
+                if(cachedUser) {
+                    usuarioActual = JSON.parse(cachedUser);
+                    restaurarSesionYDraft();
                 } else {
-                    setErrorMsg("Error al cargar datos del servidor.");
+                    cambiarVista('vistaLogin');
                 }
-                setDataLoading(false);
-            };
-
-            const handleAuth = async (e) => {
-                e.preventDefault(); setLoading(true); setErrorMsg('');
-                const cedula = e.target.cedula.value;
-                const password = e.target.password.value;
-                const res = await apiCall('login', { cedula, password });
-                
-                if (res.status === 'success') {
-                    setUser(res.user);
-                    localStorage.setItem('elementsSessionV9', JSON.stringify(res.user));
-                    setCurrentView('home');
-                    loadAppData(res.user);
-                } else { setErrorMsg(res.message || 'Cédula o Contraseña incorrecta.'); }
-                setLoading(false);
-            };
-
-            const handleRegister = async (e) => {
-                e.preventDefault(); setLoading(true); setErrorMsg('');
-                const formData = new FormData(e.target);
-                const data = Object.fromEntries(formData.entries());
-                const res = await apiCall('register', data);
-                
-                if (res.status === 'success') {
-                    setSuccessMsg('Registro exitoso. Ingresando al Box...');
-                    setTimeout(() => { 
-                        setSuccessMsg(''); 
-                        if(res.user) {
-                            setUser(res.user);
-                            localStorage.setItem('elementsSessionV9', JSON.stringify(res.user));
-                            setCurrentView('home');
-                            loadAppData(res.user);
-                        } else {
-                            setCurrentView('login');
-                        }
-                    }, 1500);
-                } else { setErrorMsg(res.message || 'Error al registrar.'); }
-                setLoading(false);
-            };
-
-            const handleLogout = () => { 
-                setUser(null); setCurrentView('login'); 
-                localStorage.removeItem('elementsSessionV9');
-            };
-
-            const handleNavigation = (view) => { setCurrentView(view); window.scrollTo(0, 0); };
-
-            const handleActualizarSkillsClick = () => {
-                let hasImprovements = false;
-                
-                for (let mov in userSkills) {
-                    let nv = userSkills[mov];
-                    let ov = maxSkills[mov];
-                    if (gimLevels.includes(nv)) {
-                        let nIdx = gimLevels.indexOf(nv);
-                        let oIdx = ov ? gimLevels.indexOf(ov) : 0;
-                        if (nIdx > oIdx) hasImprovements = true;
-                    } else if (!isNaN(nv)) {
-                        let nVal = Number(nv);
-                        let oVal = Number(ov) || 0;
-                        if (nVal - oVal >= 5) hasImprovements = true;
-                    }
-                }
-
-                if (hasImprovements) {
-                    setUploadingReto({ Titulo: 'Validación de Nuevas Marcas (PR/Niveles)', Puntos: 'Por Calcular', isSkillUpdate: true });
-                } else {
-                    handleSaveSkillsSilently();
-                }
-            };
-
-            const handleSaveSkillsSilently = async () => {
-                setLoading(true); setErrorMsg(''); setSuccessMsg('');
-                const res = await apiCall('updateSkillsWithEvidence', {
-                    correo: user.correo || user.email, skills: userSkills, archivos: []
-                });
-                if (res.status === 'success') {
-                    setSuccessMsg('Progreso guardado (Las marcas inferiores no otorgan puntos ni requieren evidencia).');
-                    loadAppData(user); 
-                } else { setErrorMsg('Error al guardar el progreso.'); }
-                setLoading(false);
-                setTimeout(() => { setSuccessMsg(''); setErrorMsg(''); }, 4000);
-            };
-
-            const handleFileChange = (e) => {
-                const files = Array.from(e.target.files);
-                if(files.length > 0) { 
-                    const newFiles = files.map(file => ({
-                        url: URL.createObjectURL(file),
-                        type: file.type,
-                        originalFile: file
-                    }));
-                    setPreviewFiles(prev => [...prev, ...newFiles]); 
-                    setErrorMsg(''); 
-                } 
-            };
-
-            const handleEvidenceSubmit = async (e) => {
-                e.preventDefault(); setLoading(true); setSuccessMsg('Procesando evidencia (puede tardar un momento)...'); setErrorMsg('');
-                try {
-                    let archivos = [];
-                    if (previewFiles && previewFiles.length > 0) {
-                        for(let pf of previewFiles) {
-                            if(pf.originalFile.size > 8 * 1024 * 1024) { setErrorMsg("Un archivo es muy pesado (Máximo 8MB)."); setLoading(false); setSuccessMsg(''); return; }
-                            const b64 = await getBase64(pf.originalFile);
-                            archivos.push({ base64: b64, filename: pf.originalFile.name || 'evidencia.jpg' });
-                        }
-                    }
-                    
-                    let res;
-                    if (uploadingReto.isSkillUpdate) {
-                        res = await apiCall('updateSkillsWithEvidence', {
-                            correo: user.correo || user.email, skills: userSkills, archivos: archivos
-                        });
-                    } else {
-                        res = await apiCall('submitEvidence', {
-                            correo: user.correo || user.email, reto: uploadingReto.Titulo, puntos: uploadingReto.Puntos, archivos: archivos
-                        });
-                    }
-
-                    if (res.status === 'success') {
-                        setSuccessMsg(res.message || 'Evidencia enviada a revisión.');
-                        setTimeout(() => { setUploadingReto(null); setPreviewFiles([]); setSuccessMsg(''); loadAppData(user); }, 3000);
-                    } else { setErrorMsg(res.message || 'Error al subir la evidencia.'); setSuccessMsg(''); }
-                } catch(e) { setErrorMsg("Error al procesar el archivo."); setSuccessMsg(''); }
-                setLoading(false);
-            };
-
-            const completeVideoChallenge = async () => {
-                setLoading(true);
-                const res = await apiCall('submitEvidence', { correo: user.correo || user.email, reto: `Ver video: ${selectedVideo.Nombre || 'Academia'}`, puntos: 1, base64: '', filename: '' });
-                if (res.status === 'success') {
-                    setSuccessMsg('Puntos solicitados exitosamente.');
-                    setTimeout(() => { setSelectedVideo(null); setSuccessMsg(''); loadAppData(user); }, 2000);
-                } else { setErrorMsg(res.message); }
-                setLoading(false);
-            };
-
-            const handleSkillUpdate = (movimiento, valor) => { setUserSkills(prev => ({...prev, [movimiento]: valor})); };
-
-            const handleAdminValidateEvidence = async (e, estadoDecision) => {
-                e.preventDefault(); 
-                setLoading(true);
-                
-                const form = e.target.closest('form');
-                const observacion = form.observacion.value;
-                
-                if (estadoDecision === 'Rechazado' && !observacion) { 
-                    setErrorMsg("Debe seleccionar una observación para rechazar."); 
-                    setTimeout(() => setErrorMsg(''), 4000); 
-                    setLoading(false); 
-                    return; 
-                }
-                
-                const res = await apiCall('evaluateEvidence', { 
-                    rowIndex: adminEvalEvidencia._rowIndex, 
-                    estado: estadoDecision, 
-                    observacion: observacion, 
-                    puntos: estadoDecision === 'Aprobado' ? getProp(adminEvalEvidencia, 'Puntos') : 0, 
-                    correo: getProp(adminEvalEvidencia, 'Correo') || getProp(adminEvalEvidencia, 'Atleta') 
-                });
-                
-                if (res.status === 'success') { 
-                    setAdminEvidencias(prev => prev.filter(ev => ev._rowIndex !== adminEvalEvidencia._rowIndex));
-                    setAdminEvalEvidencia(null); 
-                    setSuccessMsg(`Evidencia ${estadoDecision.toLowerCase()} correctamente. Puntos actualizados.`);
-                    setTimeout(() => setSuccessMsg(''), 4000);
-                    loadAppData(user); 
-                } else { 
-                    setErrorMsg(res.message); 
-                    setTimeout(() => setErrorMsg(''), 4000);
-                }
-                setLoading(false);
-            };
-
-            const handlePaymentUpdate = async (e) => {
-                e.preventDefault(); setLoading(true);
-                const formData = new FormData(e.target);
-                const res = await apiCall('updatePayment', { rowIndex: editingPayment._rowIndex, data: Object.fromEntries(formData.entries()) });
-                if (res.status === 'success') { setSuccessMsg('Actualizado correctamente.'); setTimeout(() => { setSuccessMsg(''); setEditingPayment(null); loadAppData(user); }, 1500); } else { setErrorMsg(res.message); }
-                setLoading(false);
-            };
-
-            const calcularDias = (fechaCaducidad) => {
-                if (!fechaCaducidad) return { texto: 'Sin fecha', color: 'text-brand-dark/50' };
-                const expDate = new Date(fechaCaducidad);
-                if(isNaN(expDate.getTime())) return { texto: 'Inválida', color: 'text-brand-dark/50' };
-                const utcDate = new Date(expDate.getTime() + expDate.getTimezoneOffset() * 60000);
-                const today = new Date().setHours(0,0,0,0); utcDate.setHours(0,0,0,0);
-                const diffDays = Math.ceil((utcDate - today) / (1000 * 60 * 60 * 24));
-                if (diffDays < 0) return { texto: `Vencido hace ${Math.abs(diffDays)} días`, color: 'text-red-600' };
-                if (diffDays === 0) return { texto: 'Vence HOY', color: 'text-orange-600' };
-                if (diffDays <= 5) return { texto: `Vence en ${diffDays} días`, color: 'text-orange-500' };
-                return { texto: `${diffDays} días restantes`, color: 'text-green-600' };
-            };
-
-            const groupedFilteredVideos = useMemo(() => {
-                const lowerSearch = String(searchTerm || '').toLowerCase();
-                const filtered = videos?.filter(v => String(getProp(v, 'Nombre') || '').toLowerCase().includes(lowerSearch) || String(getProp(v, 'Descripcion') || '').toLowerCase().includes(lowerSearch)) || [];
-                return filtered.reduce((acc, v) => {
-                    const cat = getProp(v, 'Categoria') || 'General';
-                    if (!acc[cat]) acc[cat] = []; acc[cat].push(v); return acc;
-                }, {});
-            }, [videos, searchTerm]);
-
-            const toggleCategory = (cat) => setExpandedCategories(prev => ({ ...prev, [cat]: !prev[cat] }));
-
-            const Topbar = () => (
-                <div className="sticky top-0 z-[100] bg-brand-bg1/95 backdrop-blur-xl px-6 py-4 flex justify-between items-center shadow-sm border-b border-brand-dark/10">
-                    <div className="flex items-center gap-2">
-                        <div className="bg-brand-dark p-2 rounded-lg shadow-lg"><ElementaLogo className="w-6 h-6 text-brand-bg1" /></div>
-                        <span className="font-black text-xl tracking-widest uppercase text-brand-dark">Elementa</span>
-                    </div>
-                    {user && (
-                        <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-black/5 transition-colors text-brand-dark/80 font-bold text-xs uppercase tracking-wider">
-                            Salir <LogOut className="w-4 h-4" />
-                        </button>
-                    )}
-                </div>
-            );
-
-            // ENCABEZADO COMPRIMIDO Y RE-DISEÑADO
-            const ProfileSuperCard = () => (
-                <div className="sticky top-[76px] z-[90] glass-card rounded-[2rem] p-3.5 flex flex-col gap-3.5 border border-white/60 shadow-lg mb-4 transition-all">
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2.5">
-                            <div className="w-10 h-10 bg-brand-dark text-brand-bg1 rounded-full flex items-center justify-center font-black text-xl shadow-md ring-2 ring-brand-bg1/50">
-                                {String(user.name || 'E').charAt(0).toUpperCase()}
-                            </div>
-                            <div className="flex flex-col justify-center">
-                                <h2 className="text-sm font-black uppercase leading-none text-brand-dark tracking-tight">
-                                    {user.name} {user.apellidos || ''}
-                                </h2>
-                                <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                    <span className="text-[8px] bg-black/5 px-1.5 py-0.5 rounded font-black uppercase text-brand-dark/60 border border-brand-dark/10">{user.plan || 'Sin Plan'}</span>
-                                    <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase shadow-sm ${String(user.status || '').trim().toLowerCase() === 'activo' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>{user.status}</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button onClick={() => handleNavigation('ranking')} className="btn-puntos px-4 py-1.5 rounded-[1rem] flex flex-col items-center shadow-md cursor-pointer shrink-0">
-                            <span className="font-black text-xl leading-none">{misPuntos}</span>
-                            <span className="text-[7px] font-black uppercase tracking-widest mt-0.5 opacity-90 flex items-center gap-0.5"><Trophy className="w-2.5 h-2.5"/> Puntos</span>
-                        </button>
-                    </div>
-
-                    {!String(user.plan || '').includes('12 Clases') ? (
-                        <div className="flex gap-2 w-full">
-                            <div className="flex-1 bg-green-500/10 border border-green-500/20 rounded-xl p-1.5 px-3 flex items-center justify-between gap-1 shadow-sm">
-                                <div className="flex items-center gap-1">
-                                    <Clock className="w-3 h-3 text-green-700 opacity-70"/>
-                                    <span className="text-[8px] font-black uppercase text-green-700/60 leading-none">Ingreso</span>
-                                </div>
-                                <span className="text-[10px] font-black text-green-800 leading-none tracking-wide">{formatearFecha(user.ingreso)}</span>
-                            </div>
-                            <div className="flex-1 bg-red-500/10 border border-red-500/20 rounded-xl p-1.5 px-3 flex items-center justify-between gap-1 shadow-sm">
-                                <div className="flex items-center gap-1">
-                                    <AlertCircle className="w-3 h-3 text-red-700 opacity-70"/>
-                                    <span className="text-[8px] font-black uppercase text-red-700/60 leading-none">Vence</span>
-                                </div>
-                                <span className="text-[10px] font-black text-red-800 leading-none tracking-wide">{formatearFecha(user.caducidad)}</span>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="bg-brand-dark/5 rounded-xl p-1.5 flex justify-center items-center text-[10px] font-black text-brand-dark border border-brand-dark/10 shadow-sm">
-                            <span className="flex items-center gap-1"><Clock className="w-3 h-3"/> Tienes <strong className="text-sm mx-1">{user.diasRestantes || 0}</strong> clases restantes</span>
-                        </div>
-                    )}
-                </div>
-            );
-
-            const BottomNav = () => (
-                <div className="fixed bottom-0 left-0 w-full bg-brand-dark backdrop-blur-lg shadow-[0_-10px_40px_rgba(0,0,0,0.2)] z-[99999] border-t-2 border-brand-bg2 pb-[env(safe-area-inset-bottom)]">
-                    <div className="flex justify-between items-center max-w-md mx-auto p-3 px-6">
-                        {['home', 'wod', 'academy', 'blog'].map(view => {
-                            const isApp = currentView === view;
-                            const icons = { home: Home, wod: Calendar, academy: Video, blog: BookOpen };
-                            const labels = { home: 'Home', wod: 'WOD', academy: 'Videos', blog: 'Eventos' };
-                            const Icon = icons[view];
-                            return (
-                                <button key={view} onClick={() => handleNavigation(view)} className={`relative flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${isApp ? 'text-brand-bg1 scale-110' : 'text-white/50 hover:text-white/80'}`}>
-                                    <Icon className="w-6 h-6" />
-                                    <span className="text-[9px] font-black uppercase tracking-widest">{labels[view]}</span>
-                                </button>
-                            );
-                        })}
-                        {user?.role === 'admin' && (
-                            <button onClick={() => handleNavigation('admin')} className={`relative flex flex-col items-center justify-center gap-1.5 transition-all duration-300 ${currentView === 'admin' ? 'text-brand-bg1 scale-110' : 'text-white/50 hover:text-white/80'}`}>
-                                <Database className="w-6 h-6" />
-                                <span className="text-[9px] font-black uppercase tracking-widest">Admin</span>
-                            </button>
-                        )}
-                    </div>
-                </div>
-            );
-
-            return (
-                <div className="pb-32 min-h-screen">
-                    <style dangerouslySetInnerHTML={{ __html: customStyles }} />
-
-                    {dataLoading && <GlobalLoader />}
-
-                    {(user || currentView !== 'login') && <Topbar />}
-
-                    <div className="max-w-4xl mx-auto px-4 pt-6">
-                        
-                        {/* PROFILE CARD FLOTANTE EN TODAS LAS VISTAS (MENOS RANKING/LOGIN) */}
-                        {user && currentView !== 'login' && currentView !== 'register' && currentView !== 'ranking' && <ProfileSuperCard />}
-
-                        {/* LOGIN Y REGISTRO */}
-                        {!user && (currentView === 'login' || currentView === 'register') && (
-                            <div className="flex flex-col items-center justify-center animate-slide-up py-10">
-                                <div className="mb-8 flex flex-col items-center">
-                                    <div className="w-24 h-24 rounded-full bg-brand-dark flex items-center justify-center shadow-2xl mb-4 border-4 border-brand-dark/10"><ElementaLogo className="w-16 h-16 text-brand-bg1" /></div>
-                                    <h1 className="text-4xl font-black uppercase tracking-widest text-brand-dark drop-shadow-sm">Elementa</h1>
-                                    <h2 className="text-xl font-medium tracking-[0.4em] text-brand-dark/70">TRAINING BOX</h2>
-                                </div>
-                                
-                                <div className="glass-card p-6 sm:p-8 rounded-[2.5rem] w-full max-w-md">
-                                    <h3 className="text-2xl font-black mb-6 text-center">{currentView === 'login' ? 'Iniciar Sesión' : 'Registro de Atleta'}</h3>
-                                    
-                                    {errorMsg && <div className="bg-red-500/10 text-red-700 p-3 rounded-xl mb-6 text-sm font-bold text-center border border-red-500/20">{errorMsg}</div>}
-                                    {successMsg && <div className="bg-green-500/10 text-green-700 p-3 rounded-xl mb-6 text-sm font-bold text-center border border-green-500/20">{successMsg}</div>}
-                                    
-                                    <form id="loginForm" onSubmit={currentView === 'login' ? handleAuth : handleRegister} className="space-y-4">
-                                        {currentView === 'register' && (
-                                            <div className="h-64 overflow-y-auto hide-scroll space-y-4 px-1 pb-4">
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Nombres</label><input type="text" name="nombres" required pattern="^[A-Za-zÀ-ÿ\s]+$" title="Solo letras y espacios" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
-                                                    <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Apellidos</label><input type="text" name="apellidos" required pattern="^[A-Za-zÀ-ÿ\s]+$" title="Solo letras y espacios" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Cédula</label><input type="number" name="cedula" required min="10000" title="Número de documento válido" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
-                                                    <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Teléfono</label><input type="tel" name="telefono" required pattern="[0-9]{7,15}" title="Solo números (mínimo 7 dígitos)" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">EPS</label><input type="text" name="eps" required pattern="^[A-Za-zÀ-ÿ\s0-9]+$" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
-                                                    <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Fecha Nacimiento</label><input type="date" name="fechaNac" required max={new Date().toISOString().split("T")[0]} className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
-                                                </div>
-                                                <div className="p-4 bg-brand-dark/5 rounded-xl border border-brand-dark/10 space-y-4 mt-2">
-                                                    <p className="text-[10px] font-black uppercase text-brand-dark/50 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> En caso de emergencia</p>
-                                                    <input type="text" name="contactoEmergencia" required pattern="^[A-Za-zÀ-ÿ\s]+$" title="Nombre del contacto (solo letras)" placeholder="Nombre del contacto" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark text-sm" />
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <input type="text" name="parentesco" required pattern="^[A-Za-zÀ-ÿ\s]+$" title="Parentesco (Ej: Madre)" placeholder="Parentesco (Ej: Madre)" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark text-sm" />
-                                                        <input type="tel" name="numContactoEmergencia" required pattern="[0-9]{7,15}" title="Solo números (mínimo 7 dígitos)" placeholder="Teléfono" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark text-sm" />
-                                                    </div>
-                                                </div>
-                                                <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark mt-2">Correo Electrónico</label><input type="email" name="correo" required className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" /></div>
-                                            </div>
-                                        )}
-                                        
-                                        {currentView === 'login' && (
-                                            <>
-                                                <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Cédula</label><input type="number" name="cedula" required className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark tracking-wider" placeholder="Número de Documento" /></div>
-                                            </>
-                                        )}
-
-                                        <div><label className="block text-[10px] font-black mb-1 ml-1 uppercase text-brand-dark">Contraseña</label><input type="password" name="password" required minLength="4" className="w-full p-3.5 rounded-xl bg-white/50 focus:bg-white outline-none font-bold text-brand-dark" placeholder="Tu contraseña" /></div>
-                                        
-                                        <button type="submit" disabled={loading} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black text-lg mt-2 hover:scale-[1.02] transition-transform shadow-xl">
-                                            {loading ? 'Cargando...' : (currentView === 'login' ? 'Entrar al Box' : 'Crear Mi Cuenta')}
-                                        </button>
-                                    </form>
-
-                                    <div className="mt-6 text-center">
-                                        <button onClick={() => setCurrentView(currentView === 'login' ? 'register' : 'login')} className="text-xs font-bold text-brand-dark/80 hover:text-brand-dark underline decoration-2 underline-offset-4">
-                                            {currentView === 'login' ? 'Soy nuevo, quiero registrarme' : 'Ya tengo cuenta, iniciar sesión'}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* HOME: SKILLS / HABILIDADES */}
-                        {user && currentView === 'home' && (
-                            <div className="animate-slide-up space-y-4">
-                                {errorMsg && <div className="bg-red-500/10 text-red-700 p-3 rounded-xl text-sm font-bold text-center border border-red-500/20">{errorMsg}</div>}
-                                {successMsg && <div className="bg-green-500 text-white p-3 rounded-xl text-sm font-bold text-center shadow-lg animate-pulse">{successMsg}</div>}
-
-                                <div className="flex gap-2 overflow-x-auto hide-scroll pb-2 mt-4">
-                                    <button onClick={() => setSkillTab('gimnasia')} className={`flex-1 py-3 rounded-xl font-black uppercase text-sm transition-all shadow-sm ${skillTab === 'gimnasia' ? 'bg-brand-dark text-brand-bg1' : 'bg-white/50 text-brand-dark hover:bg-white border border-brand-dark/5'}`}>Gimnasia</button>
-                                    <button onClick={() => setSkillTab('levantamientos')} className={`flex-1 py-3 rounded-xl font-black uppercase text-sm transition-all shadow-sm ${skillTab === 'levantamientos' ? 'bg-brand-dark text-brand-bg1' : 'bg-white/50 text-brand-dark hover:bg-white border border-brand-dark/5'}`}>Levantamientos</button>
-                                </div>
-
-                                <div className="glass-card rounded-[1.5rem] p-4 sm:p-6 border border-white/40 shadow-sm mt-2 mb-6">
-                                    {skillTab === 'gimnasia' && (
-                                        <div className="space-y-4 animate-fade-in">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Target className="w-6 h-6 text-brand-dark"/>
-                                                <h3 className="font-black text-xl uppercase tracking-wider text-brand-dark">Gimnasia</h3>
-                                            </div>
-                                            <p className="text-[10px] font-bold text-brand-dark/60 bg-white/50 p-3 rounded-xl leading-tight">Tu récord oficial es la base. Si solicitas validar una banda de mayor dificultad, requerirá evidencia en foto o video.</p>
-                                            
-                                            <div className="flex items-center gap-4 text-[9px] font-black uppercase text-brand-dark/60 mt-3 justify-center bg-white/50 p-2 rounded-xl mb-4 shadow-sm">
-                                                <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full border-2 border-dashed border-gray-400"></div> Nivel Solicitado</span>
-                                                <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-blue-500"></div> PR Oficial</span>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                                            {movimientosGimnasia.map((mov, idx) => {
-                                                return (
-                                                <div key={idx} className="bg-white/60 p-3.5 sm:p-4 rounded-2xl border border-brand-dark/10 shadow-sm flex flex-col gap-3">
-                                                    <div className="flex justify-between items-start">
-                                                        <h4 className="font-black text-xs text-brand-dark uppercase tracking-wider">{mov}</h4>
-                                                        <div className="flex flex-col items-end gap-1 max-w-[60%] text-right">
-                                                            {maxSkills[mov] && maxSkills[mov] !== 'azul' && (
-                                                                <span className="text-[8px] font-black uppercase tracking-widest text-brand-dark/40 bg-black/5 px-2 py-0.5 rounded">PR Oficial: {nivelesGimnasiaList.find(n => n.color === maxSkills[mov])?.label || 'Banda Azul'}</span>
-                                                            )}
-                                                            {pendingSkills[mov] && gimLevels.indexOf(pendingSkills[mov]) > gimLevels.indexOf(maxSkills[mov] || 'azul') && (
-                                                                <span className="text-[8px] font-black uppercase tracking-widest text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200 flex items-center gap-1 shadow-sm leading-tight">
-                                                                    <Clock className="w-2.5 h-2.5 shrink-0"/> En validación: {nivelesGimnasiaList.find(n => n.color === pendingSkills[mov])?.label}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center justify-between bg-black/5 p-2 rounded-full border border-black/5 mt-1 relative">
-                                                            {nivelesGimnasiaList.map(nv => {
-                                                                const isActive = userSkills[mov] === nv.color;
-                                                                const isMaxOfficial = maxSkills[mov] === nv.color;
-                                                                
-                                                                let btnClass = "w-7 h-7 sm:w-8 sm:h-8 rounded-full transition-all duration-300 relative group flex items-center justify-center ";
-                                                                
-                                                                if (isMaxOfficial) {
-                                                                    btnClass += `bg-band-${nv.color} shadow-lg scale-110 z-10 border-2 border-transparent`;
-                                                                } else if (isActive) {
-                                                                    btnClass += `bg-transparent border-band-${nv.color} border-[3px] border-dashed scale-110 videogame-active z-10`;
-                                                                } else {
-                                                                    btnClass += `bg-black/10 border-2 border-transparent opacity-40 hover:opacity-100 grayscale hover:grayscale-0 hover:scale-110`;
-                                                                }
-
-                                                                return (
-                                                                <button 
-                                                                    key={nv.color}
-                                                                    onClick={() => handleSkillUpdate(mov, nv.color)}
-                                                                    className={btnClass}
-                                                                    title={`${nv.nivel}: ${nv.label}`}
-                                                                >
-                                                                    {isActive && <CheckCircle className={`w-4 h-4 drop-shadow-md z-20 absolute ${isMaxOfficial ? 'text-white' : `text-${nv.color}-600`}`}/>}
-                                                                </button>
-                                                            )})}
-                                                        </div>
-                                                        <div className="text-[9px] font-black text-center uppercase tracking-widest text-brand-dark/50">
-                                                            Nivel a Solicitar: {userSkills[mov] ? nivelesGimnasiaList.find(n => n.color === userSkills[mov])?.label : 'Sin Nivel'}
-                                                        </div>
-                                                    </div>
-                                                )})}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {skillTab === 'levantamientos' && (
-                                        <div className="space-y-4 animate-fade-in">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Dumbbell className="w-6 h-6 text-brand-dark"/>
-                                                <h3 className="font-black text-xl uppercase tracking-wider text-brand-dark">Levantamientos</h3>
-                                            </div>
-                                            <p className="text-[10px] font-bold text-brand-dark/60 bg-white/50 p-3 rounded-xl leading-tight">Si rompes tu PR oficial (+5lb o más), solicita validación para tus puntos subiendo tu video aquí.</p>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                                                {movimientosLevantamiento.map((mov, idx) => (
-                                                    <div key={idx} className="bg-white/60 p-4 rounded-2xl border border-brand-dark/10 flex items-center justify-between gap-3 shadow-sm hover:bg-white/80 transition-colors flex-wrap">
-                                                        <div className="flex flex-col flex-1 items-start">
-                                                            <h4 className="font-black text-xs text-brand-dark uppercase tracking-wider leading-tight">{mov}</h4>
-                                                            <span className="text-[9px] font-black text-brand-dark/40 uppercase mt-0.5 mb-1 flex items-center gap-1">
-                                                                PR Oficial: <strong className={`${maxSkills[mov] > 0 ? 'text-brand-bg1 bg-brand-dark px-1.5 py-0.5 rounded shadow-sm' : ''}`}>{maxSkills[mov] || 0} LBS</strong>
-                                                            </span>
-                                                            {pendingSkills[mov] > (maxSkills[mov] || 0) && (
-                                                                <span className="text-[8px] font-black uppercase tracking-widest text-orange-700 bg-orange-100 px-2 py-0.5 rounded border border-orange-200 flex items-center gap-1 shadow-sm mt-1">
-                                                                    <Clock className="w-2.5 h-2.5"/> En validación: {pendingSkills[mov]} LBS
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex items-center gap-1 w-24 sm:w-28 bg-white p-1 rounded-xl border border-brand-dark/20 focus-within:border-brand-dark/60 transition-colors shadow-inner shrink-0">
-                                                            <input 
-                                                                type="number" 
-                                                                placeholder="0" 
-                                                                value={userSkills[mov] !== undefined ? userSkills[mov] : ''}
-                                                                onChange={(e) => handleSkillUpdate(mov, e.target.value)}
-                                                                className="w-full p-2 bg-transparent outline-none font-black text-center text-brand-dark text-lg sm:text-xl" 
-                                                            />
-                                                            <span className="text-[8px] font-black uppercase text-brand-dark/50 pr-2">LBS</span>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                    
-                                    <button onClick={handleActualizarSkillsClick} disabled={loading} className="w-full mt-6 bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase text-sm shadow-xl hover:scale-[1.02] transition-transform flex items-center justify-center gap-2">
-                                        {loading ? 'Validando Progreso...' : <><Upload className="w-5 h-5"/> Actualizar Mi Progreso</>}
-                                    </button>
-                                </div>
-
-                                {/* HISTORIAL DE BATALLAS COMPACTO (TIPO HUD) */}
-                                <div className="mt-8 pt-6 border-t-2 border-brand-dark/10 animate-fade-in">
-                                    <div className="flex items-center gap-2 mb-4 px-2">
-                                        <Activity className="w-5 h-5 text-brand-dark"/>
-                                        <h3 className="font-black text-lg uppercase tracking-wider text-brand-dark drop-shadow-sm">Historial</h3>
-                                    </div>
-                                    
-                                    <div className="max-h-[300px] overflow-y-auto hide-scroll pr-1 pb-4">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                                            {history.length === 0 ? (
-                                                <div className="bg-white/40 p-4 rounded-xl border border-brand-dark/10 text-center shadow-sm col-span-full">
-                                                    <p className="font-bold text-brand-dark/60 text-[10px]">Aún no hay registros en tu historial.</p>
-                                                </div>
-                                            ) : (
-                                                history.map((item, idx) => {
-                                                    const isApproved = String(item.Estado).toLowerCase() === 'aprobado';
-                                                    const isRejected = String(item.Estado).toLowerCase() === 'rechazado';
-                                                    
-                                                    return (
-                                                        <div key={idx} className="bg-brand-dark text-brand-bg1 rounded-xl p-3 shadow-sm border border-brand-bg2/20 flex flex-col gap-1.5 relative overflow-hidden group hover:scale-[1.01] transition-transform">
-                                                            <div className={`absolute left-0 top-0 w-1.5 h-full ${isApproved ? 'bg-green-500' : isRejected ? 'bg-red-500' : 'bg-orange-500'}`}></div>
-                                                            
-                                                            <div className="flex justify-between items-center pl-2">
-                                                                <h4 className="font-black text-[10px] sm:text-xs uppercase leading-tight pr-2 drop-shadow-sm truncate">{item.Reto}</h4>
-                                                                <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap tracking-widest ${isApproved ? 'bg-green-500/20 text-green-400 border border-green-500/30' : isRejected ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
-                                                                    {item.Estado}
-                                                                </span>
-                                                            </div>
-                                                            
-                                                            <div className="pl-2 flex flex-col gap-1">
-                                                                <div className="flex items-center gap-2 text-[9px] sm:text-[10px]">
-                                                                    <span className="font-black text-brand-bg1/50 flex items-center gap-1"><Clock className="w-2.5 h-2.5"/> {formatearFecha(item.Fecha)}</span>
-                                                                    {isApproved && item.Puntos > 0 && <span className="font-black text-green-400 flex items-center gap-0.5"><Trophy className="w-2.5 h-2.5"/> +{item.Puntos} Pts</span>}
-                                                                </div>
-                                                                {item.Observacion && (
-                                                                    <div className="bg-black/30 p-1.5 px-2 rounded-lg border border-white/5 w-fit mt-0.5">
-                                                                        <p className="text-[9px] font-medium text-brand-bg1/80 italic leading-snug">
-                                                                            "{item.Observacion}"
-                                                                        </p>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* RANKING GLOBAL */}
-                        {user && currentView === 'ranking' && (
-                            <div className="animate-slide-up space-y-6">
-                                <div className="px-2 flex items-center justify-between mt-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="bg-brand-dark p-3 rounded-xl shadow-lg"><Trophy className="w-8 h-8 text-yellow-400" /></div>
-                                        <div>
-                                            <h2 className="text-3xl font-black uppercase leading-none text-brand-dark">Ranking</h2>
-                                            <p className="text-xs font-bold text-brand-dark/50 tracking-wider">Top de Atletas Elementa</p>
-                                        </div>
-                                    </div>
-                                    <button onClick={() => setCurrentView('home')} className="bg-white/50 p-3 rounded-full hover:bg-white text-brand-dark shadow-sm"><X className="w-5 h-5"/></button>
-                                </div>
-
-                                <div className="glass-card rounded-[1.5rem] p-4 sm:p-6 border border-white/40 shadow-sm">
-                                    <div className="space-y-3">
-                                        {[...rankingList].sort((a,b) => b.puntos - a.puntos).map((r, i) => {
-                                            const isMe = r.nombre === (`${user.name || ''} ${user.apellidos || ''}`).trim();
-                                            return (
-                                                <div key={i} className={`flex items-center justify-between p-4 rounded-2xl transition-all ${isMe ? 'bg-brand-dark text-brand-bg1 shadow-lg scale-[1.02] ring-2 ring-brand-dark/20' : 'bg-white/60 text-brand-dark border border-brand-dark/10'}`}>
-                                                    <div className="flex items-center gap-4">
-                                                        <div className={`w-8 h-8 flex items-center justify-center font-black text-sm rounded-full ${i === 0 ? 'bg-yellow-400 text-yellow-900 shadow-md' : (i === 1 ? 'bg-gray-300 text-gray-800' : (i === 2 ? 'bg-orange-300 text-orange-900' : 'bg-black/10'))}`}>
-                                                            {i + 1}
-                                                        </div>
-                                                        <span className="font-black text-sm uppercase tracking-wide">{r.nombre}</span>
-                                                    </div>
-                                                    <div className="flex flex-col items-end">
-                                                        <span className="font-black text-lg leading-none">{r.puntos}</span>
-                                                        <span className="text-[8px] font-black uppercase tracking-widest opacity-60">Pts</span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                        {rankingList.length === 0 && <p className="text-center font-bold text-sm text-brand-dark/50 py-4">No hay datos de ranking aún.</p>}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* WOD Y RETOS */}
-                        {user && currentView === 'wod' && (
-                            <div className="animate-slide-up space-y-6">
-                                <div className="px-2 mt-4">
-                                    <h2 className="text-4xl font-black uppercase leading-none mt-1">WOD</h2>
-                                    <p className="text-sm font-bold text-brand-dark/50 mt-2">Entrenamientos y Retos</p>
-                                </div>
-
-                                {dataLoading ? <Loader /> : (
-                                    <div className="space-y-6">
-                                        {(!wodsList || wodsList.length === 0) ? (
-                                            <div className="bg-white/40 p-6 rounded-2xl border border-brand-dark/10 text-center shadow-sm">
-                                                <Calendar className="w-10 h-10 mx-auto text-brand-dark/30 mb-3" />
-                                                <p className="font-bold text-brand-dark/60 text-sm">No hay entrenamientos cargados.</p>
-                                            </div>
-                                        ) : (
-                                            wodsList.map((wod, idx) => (
-                                                <div key={idx} className="glass-card rounded-[1.5rem] p-6 border border-brand-dark/10 shadow-md relative overflow-hidden group">
-                                                    <div className="absolute top-0 left-0 w-2 h-full bg-brand-dark"></div>
-                                                    <div className="flex justify-between items-start mb-4">
-                                                        <h3 className="text-2xl font-black uppercase text-brand-dark">{getProp(wod, 'Titulo') || 'WOD'}</h3>
-                                                        <span className="text-xs font-bold text-brand-dark/50 bg-white/50 px-3 py-1 rounded-full">{formatearFecha(getProp(wod, 'Fecha'))}</span>
-                                                    </div>
-                                                    <div className="bg-white/40 p-5 rounded-xl font-medium text-brand-dark/90 whitespace-pre-wrap leading-relaxed border border-white/50 text-sm">
-                                                        {getProp(wod, 'Descripcion') || 'Sin descripción'}
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-
-                                        <div className="pt-4 border-t-2 border-brand-dark/10">
-                                            <h3 className="font-black text-xl uppercase mb-4 px-2 flex items-center gap-2"><Trophy className="w-5 h-5"/> Retos Disponibles</h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            {retosList?.map((reto, idx) => {
-                                                if(!reto) return null;
-                                                const isAutoReto = String(getProp(reto, 'Titulo')).toLowerCase().includes('video') || String(getProp(reto, 'Titulo')).toLowerCase().includes('nivel') || String(getProp(reto, 'Titulo')).toLowerCase().includes('bandas');
-                                                return (
-                                                <div key={idx} className="bg-white/60 p-5 rounded-2xl border border-brand-dark/5 flex flex-col h-full shadow-sm">
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <h4 className="font-black uppercase text-sm leading-tight text-brand-dark pr-2">{getProp(reto, 'Titulo') || 'Reto'}</h4>
-                                                        <span className="bg-green-100 text-green-700 font-black text-[10px] px-2 py-1 rounded-full uppercase tracking-wider border border-green-200 shrink-0">+{getProp(reto, 'Puntos') || 0} Pts</span>
-                                                    </div>
-                                                    <p className="text-xs font-bold text-brand-dark/60 mb-4 flex-1 leading-relaxed">{getProp(reto, 'Descripcion') || ''}</p>
-                                                    {isAutoReto ? (
-                                                        <div className="w-full bg-black/5 text-brand-dark/60 py-2.5 rounded-xl font-black text-[10px] uppercase text-center border border-black/5">
-                                                            Puntos Automáticos del Sistema
-                                                        </div>
-                                                    ) : (
-                                                        <button onClick={() => setUploadingReto({ Titulo: getProp(reto, 'Titulo'), Puntos: getProp(reto, 'Puntos') })} className="w-full bg-brand-dark text-brand-bg1 py-2.5 rounded-xl font-black text-[10px] uppercase shadow-md flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform">
-                                                            <Upload className="w-4 h-4"/> Subir Evidencia
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            )})}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* ACADEMIA DE VIDEOS */}
-                        {user && currentView === 'academy' && (
-                            <div className="animate-slide-up space-y-6">
-                            <div className="px-2 mt-4">
-                                <h2 className="text-4xl font-black uppercase leading-none mt-1">Eventos</h2>
-                                <p className="text-sm font-bold text-brand-dark/50 mt-2">Actividades extraordinarias y comunidad</p>
-                            </div>
-                            {dataLoading ? <Loader /> : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                                    {blogPosts?.map((post, idx) => {
-                                        if(!post) return null;
-                                        const urlImg = getDirectImageUrl(getProp(post, 'URL_Imagen'));
-                                        return (
-                                            <div key={idx} onClick={() => setSelectedPost({...post, parsedImage: urlImg})} className="glass-card rounded-[1.5rem] overflow-hidden group hover:shadow-2xl transition-all duration-300 relative cursor-pointer flex flex-col border border-white/40">
-                                                {urlImg && (
-                                                    <div className="h-40 sm:h-48 w-full relative overflow-hidden bg-brand-dark">
-                                                        <img src={urlImg} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" alt="News" />
-                                                    </div>
-                                                )}
-                                                <div className="p-5 bg-white/40 flex-1 flex flex-col">
-                                                    <div className="flex justify-between items-start mb-3">
-                                                        <span className="bg-brand-dark text-brand-bg1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider">{getProp(post, 'Etiqueta') || 'Evento'}</span>
-                                                        <span className="text-[9px] font-bold text-brand-dark/50 uppercase">{formatearFecha(getProp(post, 'Fecha'))}</span>
-                                                    </div>
-                                                    <h3 className="text-lg font-black leading-tight mb-2">{getProp(post, 'Titulo') || ''}</h3>
-                                                    <p className="font-medium text-brand-dark/70 text-xs mb-4 line-clamp-2">{getProp(post, 'Descripcion Corta') || getProp(post, 'Descripcion') || ''}</p>
-                                                    <div className="mt-auto pt-3 border-t border-brand-dark/10 flex items-center justify-between">
-                                                        <span className="text-[10px] font-bold text-brand-dark/60">{getProp(post, 'Autor') || 'Elementa'}</span>
-                                                        <span className="text-[10px] font-black uppercase flex items-center">Leer más <Play className="w-3 h-3 ml-1"/></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                                <div className="relative">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-brand-dark/50" />
-                                    <input type="text" placeholder="Buscar movimiento..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/60 focus:bg-white outline-none transition-all shadow-inner font-bold text-brand-dark" />
-                                </div>
-                                {dataLoading ? <Loader /> : (
-                                    <div className="space-y-4">
-                                        {Object.keys(groupedFilteredVideos).map((category, catIdx) => (
-                                            <div key={catIdx} className="glass-card rounded-[1.5rem] overflow-hidden border border-white/40 shadow-sm">
-                                                <button onClick={() => toggleCategory(category)} className="w-full p-5 flex justify-between items-center hover:bg-white/40 transition-colors">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="bg-brand-dark text-brand-bg1 w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shadow-inner">{groupedFilteredVideos[category].length}</div>
-                                                        <h3 className="font-black text-lg uppercase tracking-wider">Categoría {category}</h3>
-                                                    </div>
-                                                    {expandedCategories[category] ? <ChevronUp className="w-5 h-5 opacity-50"/> : <ChevronDown className="w-5 h-5 opacity-50"/>}
-                                                </button>
-                                                {expandedCategories[category] && (
-                                                    <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-6 bg-black/5 animate-fade-in border-t border-white/20">
-                                                        {groupedFilteredVideos[category].map((vid, vIdx) => {
-                                                            const videoInfo = getVideoData(getProp(vid, 'URL') || '');
-                                                            return (
-                                                                <div key={vIdx} onClick={() => setSelectedVideo({ ...videoInfo, Nombre: getProp(vid, 'Nombre') })} className="bg-white rounded-3xl overflow-hidden shadow-sm cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-brand-dark/5 flex flex-col group relative">
-                                                                    <div className="relative aspect-video bg-brand-dark flex items-center justify-center overflow-hidden">
-                                                                        {videoInfo.type === 'youtube' ? (
-                                                                            <img src={`https://img.youtube.com/vi/${videoInfo.id}/hqdefault.jpg`} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105" alt={getProp(vid, 'Nombre') || ''} />
-                                                                        ) : (
-                                                                            <Video className="w-12 h-12 text-white/30" />
-                                                                        )}
-                                                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300"></div>
-                                                                        <div className="relative z-10 w-16 h-16 bg-brand-bg1/95 rounded-full flex items-center justify-center shadow-xl backdrop-blur-md group-hover:scale-110 group-hover:bg-brand-bg1 transition-all duration-300">
-                                                                            <Play className="w-8 h-8 text-brand-dark translate-x-0.5" />
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="p-5 flex-1 flex flex-col">
-                                                                        <h4 className="font-black text-xl leading-tight uppercase mb-2 text-brand-dark">{getProp(vid, 'Nombre') || ''}</h4>
-                                                                        <p className="text-sm text-brand-dark/70 font-medium line-clamp-2 mt-auto">{getProp(vid, 'Descripcion') || ''}</p>
-                                                                    </div>
-                                                                </div>
-                                                            )
-                                                        })}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* BLOG / EVENTOS */}
-                        {user && currentView === 'blog' && (
-                            <div className="animate-slide-up space-y-6">
-                                <div className="px-2 mt-4">
-                                    <h2 className="text-4xl font-black uppercase leading-none mt-1">Eventos</h2>
-                                    <p className="text-sm font-bold text-brand-dark/50 mt-2">Actividades extraordinarias y comunidad</p>
-                                </div>
-                                {dataLoading ? <Loader /> : (
-                                    <div className="grid grid-cols-1 gap-8">
-                                        {blogPosts?.map((post, idx) => {
-                                            if(!post) return null;
-                                            const urlImg = getDirectImageUrl(getProp(post, 'URL_Imagen'));
-                                            return (
-                                                <div key={idx} onClick={() => setSelectedPost({...post, parsedImage: urlImg})} className="glass-card rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all duration-300 relative cursor-pointer flex flex-col border border-white/40">
-                                                    {urlImg && (
-                                                        <div className="h-48 sm:h-72 w-full relative overflow-hidden bg-brand-dark">
-                                                            <img src={urlImg} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" alt="News" />
-                                                        </div>
-                                                    )}
-                                                    <div className="p-6 bg-white/40 flex-1 flex flex-col">
-                                                        <div className="flex justify-between items-start mb-3">
-                                                            <span className="bg-brand-dark text-brand-bg1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">{getProp(post, 'Etiqueta') || 'Evento'}</span>
-                                                            <span className="text-[10px] font-bold text-brand-dark/50 uppercase">{formatearFecha(getProp(post, 'Fecha'))}</span>
-                                                        </div>
-                                                        <h3 className="text-2xl font-black leading-tight mb-2">{getProp(post, 'Titulo') || ''}</h3>
-                                                        <p className="font-medium text-brand-dark/70 text-sm mb-4 line-clamp-2">{getProp(post, 'Descripcion Corta') || getProp(post, 'Descripcion') || ''}</p>
-                                                        <div className="mt-auto pt-4 border-t border-brand-dark/10 flex items-center justify-between">
-                                                            <span className="text-xs font-bold text-brand-dark/60">{getProp(post, 'Autor') || 'Elementa'}</span>
-                                                            <span className="text-xs font-black uppercase flex items-center">Leer más <Play className="w-3 h-3 ml-1"/></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* PANEL ADMIN */}
-                        {user && currentView === 'admin' && user?.role === 'admin' && (
-                            <div className="animate-slide-up space-y-6">
-                                <div className="px-2 mt-4"><h2 className="text-4xl font-black uppercase leading-none mt-1">Panel Admin</h2></div>
-                                <div className="flex gap-2 overflow-x-auto hide-scroll px-2 pb-2">
-                                    <button onClick={() => setAdminTab('evidencias')} className={`shrink-0 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'evidencias' ? 'bg-brand-dark text-brand-bg1 shadow-lg' : 'glass-card text-brand-dark hover:bg-white'}`}>Validar Evidencias</button>
-                                    <button onClick={() => setAdminTab('validacionPagos')} className={`shrink-0 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${adminTab === 'validacionPagos' ? 'bg-brand-dark text-brand-bg1 shadow-lg' : 'glass-card text-brand-dark hover:bg-white'}`}>Gestión Atletas</button>
-                                </div>
-
-                                {/* GESTIÓN DE ATLETAS (INFO PERSONAS) */}
-                                {adminTab === 'validacionPagos' && (
-                                    <div className="glass-card p-4 sm:p-6 rounded-[2rem] border border-white/40">
-                                        <div className="flex justify-between items-center mb-6">
-                                            <h3 className="text-xl font-black flex items-center gap-2"><Users className="w-5 h-5"/> Directorio de Atletas</h3>
-                                        </div>
-                                        
-                                        {dataLoading ? <Loader /> : (
-                                            <div className="space-y-3">
-                                                {adminSheetData?.map((row, idx) => {
-                                                    if (!row) return null;
-                                                    const nombreCompleto = `${getProp(row, 'Nombres') || ''} ${getProp(row, 'Apellidos') || ''}`.trim() || getProp(row, 'Correo') || 'Atleta Sin Nombre';
-                                                    const caducidad = getProp(row, 'Caducidad') || getProp(row, 'Fecha de Caducidad') || '';
-                                                    const estado = String(getProp(row, 'Estado') || '').trim().toLowerCase() === 'activo' ? 'Activo' : 'Inactivo';
-                                                    const infoDias = calcularDias(caducidad);
-                                                    
-                                                    return (
-                                                        <div key={idx} className="bg-white/60 p-4 rounded-2xl border border-brand-dark/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm hover:bg-white/80 transition-colors">
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center gap-2">
-                                                                    <h4 className="font-black text-brand-dark uppercase text-sm">{nombreCompleto}</h4>
-                                                                    <span className="text-[9px] bg-black/5 px-2 py-0.5 rounded font-black text-brand-dark/50">CC: {getProp(row, 'Cedula') || 'N/A'}</span>
-                                                                </div>
-                                                                <div className="flex flex-wrap gap-2 mt-2 items-center">
-                                                                    <span className={`text-[10px] font-black uppercase px-2 py-1 rounded ${estado === 'Activo' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{estado}</span>
-                                                                    <span className="text-[10px] font-bold text-brand-dark/70 bg-black/5 px-2 py-1 rounded border border-black/5">{getProp(row, 'Plan') || 'Sin Plan'}</span>
-                                                                    <span className={`text-[10px] font-black uppercase px-2 py-1 bg-white rounded border border-brand-dark/5 ${infoDias.color}`}>{infoDias.texto} ({formatearFecha(caducidad)})</span>
-                                                                </div>
-                                                            </div>
-                                                            <button onClick={() => setEditingPayment(row)} className="shrink-0 w-full sm:w-auto bg-brand-dark text-brand-bg1 px-4 py-2.5 rounded-xl font-black text-[10px] uppercase shadow-md hover:scale-105 flex items-center justify-center gap-2"><Activity className="w-4 h-4"/> Editar Estado</button>
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* VALIDACIÓN DE EVIDENCIAS */}
-                                {adminTab === 'evidencias' && (
-                                    <div className="glass-card p-4 sm:p-6 rounded-[2rem] border border-white/40">
-                                        <h3 className="text-xl font-black flex items-center gap-2 mb-6"><CheckCircle className="w-5 h-5"/> Retos y Mejoras Pendientes</h3>
-                                        
-                                        {errorMsg && <div className="bg-red-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{errorMsg}</div>}
-                                        {successMsg && <div className="bg-green-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md animate-pulse">{successMsg}</div>}
-
-                                        {adminEvalEvidencia ? (
-                                        <div className="animate-fade-in bg-white/60 p-4 sm:p-6 rounded-2xl border border-brand-dark/10">
-                                            <button onClick={() => setAdminEvalEvidencia(null)} className="text-[10px] font-black uppercase text-brand-dark/50 hover:text-brand-dark mb-4 flex items-center gap-1"><X className="w-3 h-3"/> Volver a la lista</button>
-                                            <h4 className="font-black text-xl mb-1 uppercase tracking-wider leading-tight">{getProp(adminEvalEvidencia, 'Reto')}</h4>
-                                            <p className="text-sm font-bold text-brand-dark/70 mb-4">{getProp(adminEvalEvidencia, 'Correo')}</p>
-                                            
-                                            <div className="mb-6 rounded-xl overflow-hidden text-center flex flex-col items-center gap-2">
-                                                {getProp(adminEvalEvidencia, 'URL_Evidencia') && getProp(adminEvalEvidencia, 'URL_Evidencia').indexOf('Error') === -1 && getProp(adminEvalEvidencia, 'URL_Evidencia').indexOf('Pendiente') === -1 ? (
-                                                    getProp(adminEvalEvidencia, 'URL_Evidencia').split('\n').map((lnk, idx) => (
-                                                        <a key={idx} href={lnk} target="_blank" rel="noopener noreferrer" className="bg-blue-100 text-blue-700 px-6 py-3 rounded-full font-black text-xs uppercase hover:bg-blue-200 transition-colors flex items-center gap-2 shadow-sm border border-blue-200 w-full sm:w-auto justify-center">
-                                                            <ExternalLink className="w-4 h-4"/> Ver Evidencia {idx + 1}
-                                                        </a>
-                                                    ))
-                                                ) : (
-                                                    <div className="bg-brand-dark/10 w-full h-32 rounded-xl flex items-center justify-center font-bold text-brand-dark/50 border border-brand-dark/20 border-dashed text-center px-4">
-                                                        <Camera className="w-6 h-6 mr-2 opacity-50 shrink-0"/> {getProp(adminEvalEvidencia, 'URL_Evidencia') || 'Sin Evidencia Adjunta'}
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <form className="space-y-4">
-                                                    <div>
-                                                        <label className="block text-[10px] font-black uppercase mb-1">Observación al Atleta (Obligatorio si se rechaza)</label>
-                                                        <select name="observacion" className="w-full p-3.5 rounded-xl bg-white font-bold outline-none border border-brand-dark/10 shadow-sm text-sm">
-                                                            <option value="">-- Selecciona una Observación Prediseñada --</option>
-                                                            {OPCIONES_OBSERVACION.map((o, i) => <option key={i} value={o}>{o}</option>)}
-                                                        </select>
-                                                    </div>
-                                                    <div className="grid grid-cols-2 gap-3 pt-4 border-t border-brand-dark/10">
-                                                        <button type="button" onClick={(e) => handleAdminValidateEvidence(e, 'Rechazado')} disabled={loading} className="w-full bg-red-100 text-red-700 p-4 rounded-xl font-black uppercase hover:bg-red-200 transition-colors shadow-sm">{loading ? '...' : 'Rechazar'}</button>
-                                                        <button type="button" onClick={(e) => handleAdminValidateEvidence(e, 'Aprobado')} disabled={loading} className="w-full bg-green-500 text-white p-4 rounded-xl font-black uppercase hover:bg-green-600 transition-colors shadow-md">{loading ? '...' : `Aprobar (+${getProp(adminEvalEvidencia, 'Puntos') || 0})`}</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-3">
-                                                {(!adminEvidencias || adminEvidencias.length === 0) ? (
-                                                    <p className="text-center font-bold text-brand-dark/50 py-8 bg-white/40 rounded-2xl border border-white">No hay evidencias pendientes por revisar.</p>
-                                                ) : (
-                                                    adminEvidencias.map((ev, i) => {
-                                                        if (!ev) return null;
-                                                        return (
-                                                        <div key={i} className="bg-white/60 p-4 rounded-2xl border border-brand-dark/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
-                                                            <div>
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-orange-100 text-orange-700`}>{getProp(ev, 'Estado') || 'Pendiente'}</span>
-                                                                    <span className="text-[10px] font-black uppercase text-brand-dark/50">{formatearFecha(getProp(ev, 'Fecha'))}</span>
-                                                                </div>
-                                                                <p className="font-black text-brand-dark text-sm leading-tight uppercase">{getProp(ev, 'Reto') || 'Evidencia'}</p>
-                                                                <p className="text-xs font-bold text-brand-dark/70 mt-1">{getProp(ev, 'Correo')}</p>
-                                                            </div>
-                                                            <button onClick={() => setAdminEvalEvidencia(ev)} className="w-full sm:w-auto shrink-0 bg-brand-dark text-brand-bg1 px-4 py-2.5 rounded-xl font-black text-[10px] uppercase shadow-md hover:scale-105">Evaluar Prueba</button>
-                                                        </div>
-                                                    )})
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* MODALES EXTRAS (SUBIR EVIDENCIA, EDITAR PAGOS, VER BLOG, VER VIDEO) */}
-                        {uploadingReto && (
-                            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 modal-overlay animate-fade-in">
-                                <div className="bg-[#f0e3d1] w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl relative animate-zoom-in border border-white/20">
-                                    <button type="button" onClick={() => {setUploadingReto(null); setPreviewFile(null); setErrorMsg(''); setSuccessMsg('');}} className="absolute top-4 right-4 bg-brand-dark/10 text-brand-dark p-2 rounded-full hover:bg-brand-dark/20"><X className="w-4 h-4" /></button>
-                                    <h3 className="text-xl font-black uppercase mb-2 text-center text-brand-dark">Enviar Evidencia</h3>
-                                    <p className="text-xs font-bold text-brand-dark/60 mb-6 text-center leading-tight uppercase">{uploadingReto.Titulo}</p>
-                                
-                                {successMsg && <div className="bg-yellow-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md animate-pulse">{successMsg}</div>}
-                                {errorMsg && <div className="bg-red-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{errorMsg}</div>}
-
-                                <form onSubmit={handleEvidenceSubmit} className="space-y-4">
-                                    {previewFiles.length > 0 ? (
-                                        <div className="w-full flex flex-col items-center gap-3">
-                                            <div className="w-full h-32 bg-black/5 rounded-2xl border border-black/10 overflow-x-auto flex items-center justify-start p-2 gap-2 relative group hide-scroll">
-                                                {previewFiles.map((pf, i) => (
-                                                    <div key={i} className="min-w-[100px] h-full relative rounded-xl overflow-hidden shrink-0 bg-black shadow-sm">
-                                                        {pf.type.startsWith('video/') ? (
-                                                            <video src={pf.url} className="w-full h-full object-cover"></video>
-                                                        ) : (
-                                                            <img src={pf.url} className="w-full h-full object-cover" />
-                                                        )}
-                                                        <button type="button" onClick={() => setPreviewFiles(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-md"><X className="w-3 h-3"/></button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <div className="flex justify-between w-full">
-                                                <button type="button" onClick={() => document.getElementById('galleryInputMulti').click()} className="text-brand-dark font-black text-[10px] uppercase px-3 py-1.5 rounded-lg border border-brand-dark/20 hover:bg-white/50">+ Agregar más</button>
-                                                <button type="button" onClick={() => setPreviewFiles([])} className="bg-black/10 text-brand-dark/60 font-black text-[10px] uppercase px-3 py-1.5 rounded-lg">Limpiar Todo</button>
-                                            </div>
-                                            <input type="file" id="galleryInputMulti" accept="image/*,video/*" multiple onChange={handleFileChange} className="hidden" />
-                                        </div>
-                                    ) : (
-                                        <div className="flex gap-3 w-full">
-                                            <button type="button" onClick={() => document.getElementById('cameraInput').click()} className="flex-1 h-32 rounded-2xl bg-white/60 border-2 border-brand-dark/20 hover:border-brand-dark transition-colors flex flex-col items-center justify-center gap-2 font-black text-brand-dark cursor-pointer shadow-sm">
-                                                <Camera className="w-8 h-8 opacity-70" />
-                                                <span className="text-[10px] uppercase tracking-wider">Tomar Foto</span>
-                                            </button>
-                                            <button type="button" onClick={() => document.getElementById('galleryInput').click()} className="flex-1 h-32 rounded-2xl bg-white/60 border-2 border-brand-dark/20 hover:border-brand-dark transition-colors flex flex-col items-center justify-center gap-2 font-black text-brand-dark cursor-pointer shadow-sm">
-                                                <Upload className="w-8 h-8 opacity-70" />
-                                                <span className="text-[10px] uppercase tracking-wider text-center">Adjuntar<br/>Imágenes</span>
-                                            </button>
-                                            <input type="file" id="cameraInput" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
-                                            <input type="file" id="galleryInput" accept="image/*" multiple onChange={handleFileChange} className="hidden" />
-                                        </div>
-                                    )}
-                                    
-                                    <button type="submit" disabled={loading || previewFiles.length === 0} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase hover:scale-105 shadow-xl transition-transform disabled:opacity-50 mt-4">{loading ? 'Procesando...' : 'Enviar a Revisión'}</button>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-                                                    <button type="button" onClick={() => setPreviewFile(null)} className="absolute top-2 right-2 bg-black/50 text-white font-black text-[10px] uppercase px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">Cambiar</button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="flex gap-3 w-full">
-                                                <button type="button" onClick={() => document.getElementById('cameraInput').click()} className="flex-1 h-32 rounded-2xl bg-white/60 border-2 border-brand-dark/20 hover:border-brand-dark transition-colors flex flex-col items-center justify-center gap-2 font-black text-brand-dark cursor-pointer shadow-sm">
-                                                    <Camera className="w-8 h-8 opacity-70" />
-                                                    <span className="text-[10px] uppercase tracking-wider">Tomar Foto</span>
-                                                </button>
-                                                <button type="button" onClick={() => document.getElementById('galleryInput').click()} className="flex-1 h-32 rounded-2xl bg-white/60 border-2 border-brand-dark/20 hover:border-brand-dark transition-colors flex flex-col items-center justify-center gap-2 font-black text-brand-dark cursor-pointer shadow-sm">
-                                                    <Upload className="w-8 h-8 opacity-70" />
-                                                    <span className="text-[10px] uppercase tracking-wider">Adjuntar Imagen</span>
-                                                </button>
-                                                <input type="file" id="cameraInput" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
-                                                <input type="file" id="galleryInput" accept="image/*" onChange={handleFileChange} className="hidden" />
-                                            </div>
-                                        )}
-                                        
-                                        <button type="submit" disabled={loading || !previewFile} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase hover:scale-105 shadow-xl transition-transform disabled:opacity-50">{loading ? 'Procesando...' : 'Enviar a Revisión'}</button>
-                                    </form>
-                                </div>
-                            </div>
-                        )}
-
-                        {editingPayment && (
-                            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 modal-overlay animate-fade-in">
-                                <div className="bg-[#f0e3d1] w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl relative animate-zoom-in border border-white/20">
-                                    <button type="button" onClick={() => setEditingPayment(null)} className="absolute top-4 right-4 bg-brand-dark/10 text-brand-dark p-2 rounded-full hover:bg-brand-dark/20"><X className="w-4 h-4" /></button>
-                                    <h3 className="text-xl font-black uppercase mb-1 text-center text-brand-dark flex items-center justify-center gap-2"><Activity className="w-5 h-5"/> Estado del Atleta</h3>
-                                    <p className="font-bold text-brand-dark/60 mb-6 text-center text-xs uppercase">{getProp(editingPayment, 'Nombres') ? `${getProp(editingPayment, 'Nombres')} ${getProp(editingPayment, 'Apellidos') || ''}` : getProp(editingPayment, 'Correo')}</p>
-                                    
-                                    {successMsg && <div className="bg-green-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{successMsg}</div>}
-                                    {errorMsg && <div className="bg-red-500 text-white p-3 rounded-xl mb-4 text-xs font-bold text-center shadow-md">{errorMsg}</div>}
-
-                                    <form onSubmit={handlePaymentUpdate} className="space-y-4">
-                                        <div>
-                                            <label className="block text-[10px] font-black uppercase mb-1 text-brand-dark">Plan Suscrito</label>
-                                            <select name="Plan" defaultValue={getProp(editingPayment, 'Plan')} className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-sm text-brand-dark border border-brand-dark/5 shadow-inner">
-                                                <option value="Plan Full - Elementa">Plan Full - Elementa</option>
-                                                <option value="Plan 12 Clases - Elementa">Plan 12 Clases - Elementa</option>
-                                                <option value="Plan Mañanas - Elementa">Plan Mañanas - Elementa</option>
-                                                <option value="Plan Estudiantes - Elementa">Plan Estudiantes - Elementa</option>
-                                                <option value="Plan Parejas - Elementa">Plan Parejas - Elementa</option>
-                                                <option value="Plan Semestral - Elementa">Plan Semestral - Elementa</option>
-                                                <option value="Plan Anualidad - Elementa">Plan Anualidad - Elementa</option>
-                                            </select>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-[10px] font-black uppercase mb-1 text-brand-dark">Fecha de Ingreso</label>
-                                                <input type="date" name="Fecha Ingreso" defaultValue={getProp(editingPayment, 'Fecha Ingreso') || getProp(editingPayment, 'Ingreso') ? new Date(getProp(editingPayment, 'Fecha Ingreso') || getProp(editingPayment, 'Ingreso')).toISOString().split('T')[0] : ''} className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-sm text-brand-dark border border-brand-dark/5 shadow-inner" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-[10px] font-black uppercase mb-1 text-brand-dark">Fecha de Vencimiento</label>
-                                                <input type="date" name="Fecha de Caducidad" defaultValue={getProp(editingPayment, 'Caducidad') || getProp(editingPayment, 'Fecha de Caducidad') ? new Date(getProp(editingPayment, 'Caducidad') || getProp(editingPayment, 'Fecha de Caducidad')).toISOString().split('T')[0] : ''} className="w-full p-3 rounded-xl bg-white/60 focus:bg-white outline-none font-bold text-sm text-brand-dark border border-brand-dark/5 shadow-inner" />
-                                            </div>
-                                        </div>
-                                        <div className="mt-6 pt-4 border-t border-brand-dark/10">
-                                            <button type="submit" disabled={loading} className="w-full bg-brand-dark text-brand-bg1 p-4 rounded-xl font-black uppercase hover:scale-105 shadow-xl transition-transform text-xs">{loading ? 'Guardando...' : 'Guardar Cambios'}</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        )}
-
-                        {selectedPost && (
-                            <div className="fixed inset-0 z-[120] flex items-center justify-center p-0 sm:p-6 modal-overlay animate-fade-in" onClick={() => setSelectedPost(null)}>
-                                <div className="bg-brand-bg1 w-full h-full sm:max-h-[90vh] sm:max-w-4xl sm:rounded-[2.5rem] overflow-hidden shadow-2xl relative animate-zoom-in flex flex-col border border-white/10" onClick={e => e.stopPropagation()}>
-                                    <button onClick={() => setSelectedPost(null)} className="absolute top-4 right-4 z-30 bg-black/40 backdrop-blur-md text-white p-2 rounded-full shadow-lg hover:bg-black transition-colors"><X className="w-6 h-6" /></button>
-                                    
-                                    <div className="flex-1 overflow-y-auto hide-scroll bg-brand-bg1">
-                                        {selectedPost.parsedImage && (
-                                            <div className="w-full h-64 sm:h-96 relative shadow-md bg-brand-dark">
-                                                <img src={selectedPost.parsedImage} className="w-full h-full object-cover" alt="Detalle" />
-                                            </div>
-                                        )}
-                                        <div className={`p-6 sm:p-12 ${!selectedPost.parsedImage ? 'pt-20' : ''}`}>
-                                            <div className="flex gap-3 mb-5">
-                                                <span className="bg-brand-dark text-brand-bg1 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">{getProp(selectedPost, 'Etiqueta') || 'Evento'}</span>
-                                                <span className="text-brand-dark/60 text-xs font-bold uppercase py-1.5">{formatearFecha(getProp(selectedPost, 'Fecha'))}</span>
-                                            </div>
-                                            <h2 className="text-3xl sm:text-5xl font-black text-brand-dark leading-tight mb-8 drop-shadow-sm">{getProp(selectedPost, 'Titulo')}</h2>
-                                            <div className="text-brand-dark/90 font-medium leading-relaxed whitespace-pre-wrap text-base sm:text-lg">
-                                                {getProp(selectedPost, 'Contenido') || getProp(selectedPost, 'Descripcion')}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {selectedVideo && (() => {
-                            return (
-                                <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 modal-overlay animate-fade-in" onClick={() => setSelectedVideo(null)}>
-                                    <div className="bg-black w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative aspect-video flex flex-col" onClick={e => e.stopPropagation()}>
-                                        <div className="absolute top-4 right-4 z-30 flex gap-2">
-                                            <button onClick={completeVideoChallenge} disabled={loading} className="bg-orange-500/90 text-white px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-wider hover:bg-orange-600 backdrop-blur-md shadow-lg">{loading ? '...' : 'Terminé de verlo (+ Pts)'}</button>
-                                            <button onClick={() => setSelectedVideo(null)} className="bg-black/50 text-white p-2 rounded-full hover:bg-black transition-colors border border-white/20"><X className="w-5 h-5" /></button>
-                                        </div>
-                                        <div className="flex-1 w-full h-full relative">
-                                            {selectedVideo.type === 'youtube' && <iframe src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1&rel=0&modestbranding=1`} className="absolute inset-0 w-full h-full border-0" allow="autoplay; fullscreen"></iframe>}
-                                            {selectedVideo.type === 'drive' && <iframe src={`https://drive.google.com/file/d/${selectedVideo.id}/preview`} className="absolute inset-0 w-full h-full border-0" allow="autoplay; fullscreen"></iframe>}
-                                            {!selectedVideo.type && <div className="absolute inset-0 flex items-center justify-center text-white/50 font-bold text-sm">Video no soportado (verificar link en Excel).</div>}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })()}
-
-                    </div>
-
-                    {/* AQUI AGREGAMOS EL MENU INFERIOR */}
-                    {user && currentView !== 'login' && currentView !== 'register' && <BottomNav />}
-
-                </div>
-            );
+            } else {
+                errorLoader("No se pudo cargar la base de datos.");
+            }
+        } catch (e) {
+            errorLoader("Fallo de conexión al servidor.");
         }
 
-        const root = createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+        document.querySelectorAll('#vistaApp input, #vistaApp select, #vistaApp textarea').forEach(el => {
+            if(el.type !== 'file') {
+                el.addEventListener('change', guardarDraft);
+                el.addEventListener('input', guardarDraft);
+            }
+        });
+    });
+
+    function guardarDraft() {
+        const draft = {
+            proyecto: document.getElementById('appProyecto').value,
+            frente: document.getElementById('appFrente').value,
+            ubicacion: document.getElementById('appUbicacion').value,
+            descripcion: document.getElementById('appDescripcion').value
+        };
+        localStorage.setItem('reporteDraft', JSON.stringify(draft));
+    }
+
+    function restaurarSesionYDraft() {
+        document.getElementById('infoUsuarioNombre').innerText = usuarioActual.nombre;
+        document.getElementById('infoUsuarioCedula').innerText = `CC: ${usuarioActual.cedula}`;
+        document.getElementById('infoUsuarioCorreo').innerText = usuarioActual.correo;
+        
+        const selectProyecto = document.getElementById('appProyecto');
+        selectProyecto.innerHTML = ''; 
+        Object.keys(dbProyectos).forEach(p => {
+            if (p.toUpperCase() === 'PERSONAL DISPERSO - OBRAS MANIZALES' && usuarioActual.proyecto.toUpperCase() !== 'PERSONAL DISPERSO - OBRAS MANIZALES') return;
+            let opt = document.createElement('option'); opt.value = p; opt.text = p;
+            selectProyecto.appendChild(opt);
+        });
+        
+        const badge = document.getElementById('badgeModulo');
+        badge.style.display = 'block';
+        if (usuarioActual.modulo === 'SST') {
+            badge.innerText = '🛡️ SST';
+            badge.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+        } else {
+            badge.innerText = '🏗️ OBRA';
+            badge.style.background = 'linear-gradient(135deg, #0575e6, #021b79)';
+        }
+
+        const draftStr = localStorage.getItem('reporteDraft');
+        if (draftStr) {
+            try {
+                const draft = JSON.parse(draftStr);
+                
+                if (draft.proyecto) { document.getElementById('appProyecto').value = draft.proyecto; actualizarFrentes(); }
+                else { selectProyecto.value = usuarioActual.proyecto; actualizarFrentes(); }
+                
+                if (draft.frente) { document.getElementById('appFrente').value = draft.frente; }
+                
+                document.getElementById('appUbicacion').value = draft.ubicacion || '';
+                document.getElementById('appDescripcion').value = draft.descripcion || '';
+            } catch(e) {}
+        } else {
+            selectProyecto.value = usuarioActual.proyecto;
+            actualizarFrentes();
+        }
+
+        cargarArchivosDeIndexedDB().then(archivosGuardados => {
+            if(archivosGuardados && archivosGuardados.length > 0) {
+                archivosQueue = archivosGuardados;
+                actualizarUICola();
+            }
+        });
+
+        cambiarVista('vistaApp');
+    }
+
+    function guardarArchivosEnCache() {
+        guardarArchivosEnIndexedDB(archivosQueue);
+    }
+
+    async function iniciarSesion() {
+      const nombre = document.getElementById('loginNombre').value.trim().toUpperCase();
+      const password = document.getElementById('loginPassword').value.trim();
+      if(!nombre || !password) return showToast("Por favor ingresa Usuario (Nombre) y Contraseña.");
+      
+      mostrarLoader("Autenticando Usuario");
+      try {
+        const r = await fetch(URL_APPS_SCRIPT, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: 'login', nombre: nombre, password: password }) 
+        });
+        const res = await r.json();
+        
+        if(res.estado === 'exito') {
+          usuarioActual = res;
+          document.getElementById('infoUsuarioNombre').innerText = res.nombre;
+          document.getElementById('infoUsuarioCedula').innerText = `CC: ${res.cedula}`;
+          document.getElementById('infoUsuarioCorreo').innerText = res.correo;
+
+          const selectProyecto = document.getElementById('appProyecto');
+          selectProyecto.innerHTML = ''; 
+          
+          Object.keys(dbProyectos).forEach(p => {
+              if (p.toUpperCase() === 'PERSONAL DISPERSO - OBRAS MANIZALES' && res.proyecto.toUpperCase() !== 'PERSONAL DISPERSO - OBRAS MANIZALES') return;
+              let opt = document.createElement('option'); opt.value = p; opt.text = p;
+              selectProyecto.appendChild(opt);
+          });
+          
+          selectProyecto.value = res.proyecto;
+          actualizarFrentes();
+
+          const badge = document.getElementById('badgeModulo');
+          badge.style.display = 'block';
+          if (res.modulo === 'SST') {
+              badge.innerText = '🛡️ SST';
+              badge.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+          } else {
+              badge.innerText = '🏗️ OBRA';
+              badge.style.background = 'linear-gradient(135deg, #0575e6, #021b79)';
+          }
+
+          localStorage.setItem('usuarioActual', JSON.stringify(res)); 
+          document.getElementById('loginPassword').value = ''; 
+          exitoLoader(`Bienvenido al sistema,<br><b style="color:white;">${res.nombre}</b>`, 'vistaApp');
+        } else errorLoader(res.mensaje);
+      } catch (e) { errorLoader("Error de conexión al servidor central."); }
+    }
+
+    function actualizarFrentes() {
+        const proyectoElegido = document.getElementById('appProyecto').value;
+        const frentesDropdown = document.getElementById('appFrente');
+        frentesDropdown.innerHTML = '<option value="">Seleccione...</option>';
+        
+        const infoProy = dbProyectos[proyectoElegido];
+        if(infoProy && infoProy.frentes) {
+            infoProy.frentes.forEach(f => {
+                let opt = document.createElement('option');
+                opt.value = f; opt.text = f;
+                frentesDropdown.appendChild(opt);
+            });
+        }
+    }
+
+    function validarCorreoRegex(correo) {
+        const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        return regex.test(correo);
+    }
+
+    async function registrarUsuario() {
+        const cedula = document.getElementById('regCedula').value.trim().toUpperCase();
+        const nombre = document.getElementById('regNombre').value.trim().toUpperCase();
+        const correo = document.getElementById('regCorreo').value.trim().toUpperCase();
+        const cargo = document.getElementById('regCargo').value.trim().toUpperCase();
+        const proyecto = document.getElementById('regProyecto').value;
+        
+        if(!cedula || !nombre) return showToast("Cédula y Nombre son obligatorios.");
+        if (!validarCorreoRegex(correo)) return showToast("⚠️ Por favor, ingrese un correo electrónico válido.");
+
+        mostrarLoader("Verificando Datos");
+        try {
+            const r = await fetch(URL_APPS_SCRIPT, { method: 'POST', body: JSON.stringify({ action: 'register', cedula, nombre, correo, cargo, proyecto }) });
+            const res = await r.json();
+            
+            if(res.estado === 'exito') {
+                document.getElementById('regCedula').value = ''; document.getElementById('regNombre').value = '';
+                document.getElementById('regCorreo').value = ''; document.getElementById('regCargo').value = '';
+                exitoLoader(`Solicitud enviada a Administración.`, 'vistaLogin');
+            } 
+            else if (res.estado === 'duplicado') {
+                cedulaParaReasignar = cedula; 
+                clearInterval(simuladorEnMarcha); 
+                document.getElementById("vistaLoader").classList.remove("is-processing"); 
+                cambiarVista('vistaReasignar');
+            }
+            else {
+                errorLoader(res.mensaje);
+            }
+        } catch (e) { errorLoader("Error de conexión."); }
+    }
+
+    async function enviarReasignacion() {
+        const nuevoCorreo = document.getElementById('reasignarCorreo').value.trim().toUpperCase();
+        
+        if (nuevoCorreo !== "" && !validarCorreoRegex(nuevoCorreo)) {
+            return showToast("⚠️ Por favor, ingrese un correo electrónico válido.");
+        }
+
+        mostrarLoader("Enviando Solicitud");
+        try {
+            const r = await fetch(URL_APPS_SCRIPT, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'reasignar', cedula: cedulaParaReasignar, nuevoCorreo: nuevoCorreo }) 
+            });
+            const res = await r.json();
+            
+            if(res.estado === 'exito') {
+                document.getElementById('reasignarCorreo').value = '';
+                cedulaParaReasignar = "";
+                document.getElementById('regCedula').value = ''; document.getElementById('regNombre').value = '';
+                document.getElementById('regCorreo').value = ''; document.getElementById('regCargo').value = '';
+                exitoLoader(`El Administrador ha sido notificado para reasignar su contraseña.`, 'vistaLogin');
+            } else {
+                errorLoader(res.mensaje);
+            }
+        } catch (e) { errorLoader("Error de conexión."); }
+    }
+
+    function cerrarSesion() {
+        usuarioActual = {};
+        archivosQueue = [];
+        
+        localStorage.removeItem('usuarioActual');
+        localStorage.removeItem('reporteDraft');
+        borrarArchivosDeIndexedDB(); 
+
+        actualizarUICola();
+        document.getElementById('appUbicacion').value = '';
+        document.getElementById('appDescripcion').value = '';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('badgeModulo').style.display = 'none';
+        
+        document.getElementById('appFrente').value = '';
+        
+        cambiarVista('vistaLogin');
+    }
+
+    let mediaRecorder; 
+    let audioChunks = []; 
+    let isRecording = false; 
+    let intervaloCronometro; 
+    let segundos = 0;
+    const btnGrabarAudio = document.getElementById('btnGrabarAudio'); 
+    const cronometro = document.getElementById('cronometro'); 
+
+    btnGrabarAudio.addEventListener('click', async () => {
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+          
+          mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+          
+          mediaRecorder.onstop = async () => {
+              mostrarLoader("Convirtiendo a MP3...");
+              
+              setTimeout(async () => {
+                  let mimeOriginal = mediaRecorder.mimeType || 'audio/webm';
+                  let extOriginal = 'webm';
+                  if (mimeOriginal.includes('mp4')) extOriginal = 'm4a';
+                  else if (mimeOriginal.includes('ogg')) extOriginal = 'ogg';
+                  
+                  const audioBlobOriginal = new Blob(audioChunks, { type: mimeOriginal });
+
+                  try {
+                      if (audioChunks.length === 0) throw new Error("No se capturó audio.");
+                      if (audioBlobOriginal.size < 4000) throw new Error("Audio demasiado pequeño.");
+                      if (typeof lamejs === 'undefined') throw new Error("La librería MP3 no cargó, guardando archivo original.");
+
+                      const arrayBuffer = await audioBlobOriginal.arrayBuffer();
+                      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+                      const audioCtx = new AudioCtxClass();
+                      const audioBuffer = await new Promise((resolve, reject) => {
+                          audioCtx.decodeAudioData(arrayBuffer, resolve, reject);
+                      });
+                      
+                      if (audioBuffer.duration < 0.5) throw new Error("Duración inválida");
+                      if (audioBuffer.length === 0) throw new Error("Buffer vacío");
+                      if (audioBuffer.numberOfChannels === 0) throw new Error("Sin canales");
+
+                      const TARGET_SAMPLE_RATE = 16000;
+                      const OfflineCtxClass = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+                      const offlineCtx = new OfflineCtxClass(1, Math.ceil(audioBuffer.duration * TARGET_SAMPLE_RATE), TARGET_SAMPLE_RATE);
+                      
+                      const source = offlineCtx.createBufferSource();
+                      source.buffer = audioBuffer;
+                      source.connect(offlineCtx.destination);
+                      source.start(0);
+                      const resampledBuffer = await offlineCtx.startRendering();
+                      
+                      const pcmData = resampledBuffer.getChannelData(0);
+                      
+                      let mp3Blob = null;
+                      let intentos = 0;
+                      const MAX_INTENTOS = 3;
+
+                      while (intentos < MAX_INTENTOS && !mp3Blob) {
+                          try {
+                              intentos++;
+                              mp3Blob = encodeToMP3FromBuffer(pcmData, TARGET_SAMPLE_RATE);
+                              if (mp3Blob.size < 5000) {
+                                  mp3Blob = null;
+                                  throw new Error("El MP3 generado resultó corrupto o inválido.");
+                              }
+                          } catch (encErr) {
+                              console.warn(`Intento ${intentos} de MP3 fallido:`, encErr);
+                              if (intentos >= MAX_INTENTOS) throw new Error("Agotados los intentos de compresión MP3.");
+                              await new Promise(r => setTimeout(r, 200)); 
+                          }
+                      }
+                      
+                      if (mp3Blob) {
+                          agregarACola(mp3Blob, 'Audio', 'mp3');
+                      } else {
+                          throw new Error("No se pudo generar el MP3 después de los intentos.");
+                      }
+                      
+                  } catch(err) {
+                      console.warn("Fallo total de conversión MP3, activando fallback:", err);
+                      agregarACola(audioBlobOriginal, 'Audio', extOriginal);
+                  } finally {
+                      document.getElementById("vistaLoader").classList.remove("is-processing");
+                      cambiarVista('vistaApp');
+                  }
+              }, 100);
+          };
+          
+          mediaRecorder.start(1000); 
+          isRecording = true;
+          
+          btnGrabarAudio.classList.add('btn-audio-grabando');
+          btnGrabarAudio.innerHTML = "⏹️ DETENER AUDIO";
+          cronometro.style.display = 'block'; segundos = 0; cronometro.innerText = "00:00";
+          intervaloCronometro = setInterval(() => {
+            segundos++;
+            cronometro.innerText = `${Math.floor(segundos/60).toString().padStart(2,'0')}:${(segundos%60).toString().padStart(2,'0')}`;
+          }, 1000);
+        } catch (error) { showToast("Permiso de micrófono denegado."); }
+      } else {
+        isRecording = false;
+        btnGrabarAudio.classList.remove('btn-audio-grabando');
+        btnGrabarAudio.innerHTML = "🎤 GRABAR AUDIO";
+        clearInterval(intervaloCronometro); cronometro.style.display = 'none';
+
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+      }
+    });
+
+    function encodeToMP3FromBuffer(float32Array, sampleRate) {
+        const mp3encoder = new lamejs.Mp3Encoder(1, sampleRate, 128); 
+        const mp3Data = [];
+        const sampleBlockSize = 1152;
+        const sampleChunk = new Int16Array(sampleBlockSize);
+
+        for (let i = 0; i < float32Array.length; i += sampleBlockSize) {
+            const limit = Math.min(sampleBlockSize, float32Array.length - i);
+            for (let j = 0; j < limit; j++) {
+                let s = Math.max(-1, Math.min(1, float32Array[i + j]));
+                sampleChunk[j] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            }
+            
+            const chunkToEncode = limit < sampleBlockSize ? sampleChunk.subarray(0, limit) : sampleChunk;
+            const mp3buf = mp3encoder.encodeBuffer(chunkToEncode);
+            
+            if (mp3buf.length > 0) mp3Data.push(mp3buf);
+        }
+
+        const mp3bufFinal = mp3encoder.flush();
+        if (mp3bufFinal.length > 0) mp3Data.push(mp3bufFinal);
+
+        return new Blob(mp3Data, { type: 'audio/mp3' });
+    }
+
+    document.getElementById('inputFoto').addEventListener('change', e => procesarArchivoLocal(e, 'Foto'));
+    document.getElementById('inputVideo').addEventListener('change', e => procesarArchivoLocal(e, 'Video'));
+
+    document.getElementById('inputGaleria').addEventListener('change', e => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+        
+        for (let i = 0; i < files.length; i++) {
+            const archivo = files[i];
+            if (archivo.size > 40 * 1024 * 1024) { 
+                showToast(`El archivo ${archivo.name} es muy pesado (Máx 40MB).`); 
+                continue; 
+            }
+            
+            let tipo = archivo.type.includes('video') ? 'Video' : 'Foto';
+            let extension = archivo.name.split('.').pop().toLowerCase();
+            if (tipo === 'Video' && (!extension || extension === '')) extension = 'mp4'; 
+            
+            agregarACola(archivo, tipo, extension);
+        }
+        e.target.value = ""; 
+    });
+
+    function procesarArchivoLocal(e, tipo) {
+      const archivo = e.target.files[0];
+      if (!archivo) return;
+      if (archivo.size > 40 * 1024 * 1024) { showToast(`Archivo muy pesado (Máx 40MB).`); e.target.value = ""; return; }
+      
+      let extension = archivo.name.split('.').pop().toLowerCase();
+      if(tipo === 'Video') extension = 'mp4'; 
+      
+      agregarACola(archivo, tipo, extension);
+      e.target.value = "";
+    }
+
+    function agregarACola(blob, tipo, extension) {
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = function() {
+          archivosQueue.push({ base64: reader.result, tipo: tipo, extension: extension });
+          guardarArchivosEnCache(); 
+          actualizarUICola();
+      }
+    }
+
+    function removerDeCola(index) {
+        archivosQueue.splice(index, 1);
+        guardarArchivosEnCache(); 
+        actualizarUICola();
+    }
+
+    function actualizarUICola() {
+        const queueList = document.getElementById('queueList');
+        const countSpan = document.getElementById('queueCount');
+        countSpan.innerText = archivosQueue.length;
+        
+        if(archivosQueue.length === 0) {
+            queueList.innerHTML = "No hay archivos pendientes.";
+            document.getElementById('btnEnviarReporte').style.display = 'none';
+            return;
+        }
+
+        document.getElementById('btnEnviarReporte').style.display = 'block';
+        queueList.innerHTML = "";
+        
+        archivosQueue.forEach((item, index) => {
+            let div = document.createElement('div');
+            let baseClass = `queue-item ${item.tipo.toLowerCase()}`;
+            if (item.hasFailed) baseClass += ' failed-item';
+            div.className = baseClass;
+            
+            let icon = item.tipo === 'Foto' ? '📸' : (item.tipo === 'Video' ? '🎥' : '🎤');
+            let failBadge = item.hasFailed ? '<br><span style="color:#ff8787; font-size:10px; margin-top:4px; display:inline-block; background:rgba(255,75,43,0.2); padding:2px 6px; border-radius:4px;">⚠️ Falló el envío, reintente</span>' : '';
+
+            div.innerHTML = `<div style="text-align: left;"><span>${icon} Archivo de ${item.tipo} ${index + 1}</span>${failBadge}</div> <button class="btn-remove" onclick="removerDeCola(${index})">×</button>`;
+            queueList.appendChild(div);
+        });
+    }
+
+    function obtenerFechaFormateada() {
+        const d = new Date();
+        const p = (n) => n.toString().padStart(2, '0');
+        return `${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()}`;
+    }
+
+    async function enviarReporteEnCola() {
+        if (isRecording) {
+            showToast("⚠️ Hay un audio grabándose. Por favor detén la grabación antes de enviar el reporte.");
+            return;
+        }
+
+        const proyectoElegido = document.getElementById('appProyecto').value;
+        const frente = document.getElementById('appFrente').value.trim().toUpperCase();
+        const ubicacion = document.getElementById('appUbicacion').value.trim().toUpperCase();
+        const descripcion = document.getElementById('appDescripcion').value.trim();
+        
+        if(!proyectoElegido) return showToast("⚠️ Seleccione un PROYECTO.");
+        if(!frente) return showToast("⚠️ Debe seleccionar un FRENTE.");
+        if(!ubicacion) return showToast("⚠️ Debe ingresar una UBICACIÓN.");
+        
+        if(archivosQueue.length === 0) {
+            return showToast("Agregue al menos un archivo.");
+        }
+
+        const infoProy = dbProyectos[proyectoElegido];
+        const sigla = infoProy ? infoProy.sigla : "S-S";
+        const fecha = obtenerFechaFormateada();
+        const modulo = usuarioActual.modulo || "OBRA";
+
+        mostrarLoader("Procesando Reporte...");
+        
+        let archivosAEnviar = [...archivosQueue];
+        let archivosRestantesEnCola = []; 
+        let errores = 0;
+        let ultimoErrorTxt = ""; 
+        let contadoresTipo = { 'Foto': 0, 'Video': 0, 'Audio': 0 };
+        
+        archivosAEnviar.forEach(item => {
+            if(contadoresTipo[item.tipo] !== undefined) contadoresTipo[item.tipo]++;
+        });
+        let resumenText = `Se cargaron: ${contadoresTipo['Foto']} Fotos, ${contadoresTipo['Video']} Videos, ${contadoresTipo['Audio']} Audios.`;
+
+        try {
+            const rTg = await fetch(URL_APPS_SCRIPT, { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    action: 'telegram_header', 
+                    proyecto: proyectoElegido,
+                    usuario: usuarioActual.nombre,
+                    frente: frente,
+                    ubicacion: ubicacion,
+                    modulo: modulo,
+                    descripcion: descripcion,
+                    resumen: resumenText
+                }) 
+            });
+            const resTg = await rTg.json();
+            if (resTg.estado === "error") {
+                errorLoader(`Fallo en la subida.<br><span style="font-size:11px;color:#ffb3b3;margin-top:10px;display:block;">Detalle: ${resTg.mensaje}</span>`);
+                return;
+            }
+        } catch(e) {}
+
+        let contadoresSubida = { 'Foto': 0, 'Video': 0, 'Audio': 0 };
+        
+        if (archivosAEnviar.length > 0) {
+            for(let i = 0; i < archivosAEnviar.length; i++) {
+                let item = archivosAEnviar[i];
+                let msg = `Subiendo y enviando archivo ${i+1} de ${archivosAEnviar.length}...`;
+                actualizarUI({ progreso: Math.floor(((i)/archivosAEnviar.length)*80), mensaje: msg });
+
+                contadoresSubida[item.tipo]++;
+                let nombreFinal = `${sigla}-${frente}-${ubicacion}-${fecha}_${modulo}_${item.tipo.toUpperCase()}${contadoresSubida[item.tipo]}.${item.extension}`;
+
+                try {
+                    const r = await fetch(URL_APPS_SCRIPT, { method: 'POST', body: JSON.stringify({ action: 'upload', base64: item.base64, nombre: nombreFinal, proyecto: proyectoElegido, modulo: modulo, frente: frente }) });
+                    const res = await r.json();
+                    
+                    if(res.estado !== 'exito') {
+                        errores++;
+                        ultimoErrorTxt = res.mensaje || "Error desconocido devuelto por el servidor.";
+                        item.hasFailed = true;
+                        archivosRestantesEnCola.push(item); 
+                    }
+                } catch (e) { 
+                    errores++; 
+                    ultimoErrorTxt = e.message || e.toString();
+                    item.hasFailed = true;
+                    archivosRestantesEnCola.push(item); 
+                }
+            }
+        }
+
+        archivosQueue = archivosRestantesEnCola;
+        guardarArchivosEnCache();
+        actualizarUICola();
+
+        let subidosExito = archivosAEnviar.length - errores;
+
+        if (subidosExito > 0) {
+            actualizarUI({ progreso: 90, mensaje: "Registrando trazabilidad..." });
+            try {
+                const payloadTrazabilidad = {
+                    action: 'trazabilidad',
+                    usuario: usuarioActual.nombre,
+                    cedula: usuarioActual.cedula,
+                    proyecto: proyectoElegido,
+                    frente: frente,
+                    ubicacion: ubicacion,
+                    modulo: modulo,
+                    resumen: `(Envío Parcial/Total) ` + resumenText,
+                    descripcion: descripcion
+                };
+                const rTraz = await fetch(URL_APPS_SCRIPT, { method: 'POST', body: JSON.stringify(payloadTrazabilidad) });
+            } catch (e) { console.log("Fallo trazabilidad, pero se avanza"); }
+        }
+
+        if(errores === 0) {
+            let tgUrl = getTelegramGroupUrl(proyectoElegido, modulo, frente);
+            let btnTelegramHTML = `<br><br><span style="color:#a0aec0; font-size:12px;">✅ Archivos enviados a Telegram.</span><br><button class="btn-action btn-telegram" style="margin-top:10px;" onclick="abrirTelegram('${tgUrl}')">✈️ ABRIR GRUPO DE TELEGRAM</button>`;
+
+            localStorage.removeItem('reporteDraft');
+            document.getElementById('appUbicacion').value = '';
+            document.getElementById('appDescripcion').value = '';
+            
+            exitoLoader(`Reporte completado exitosamente.${btnTelegramHTML}`, 'vistaApp');
+        } else {
+            let extraMsg = subidosExito > 0 ? `<br><br><span style="color:#00f260;">Se subieron ${subidosExito} archivo(s) correctamente, el resto quedó pendiente.</span>` : '';
+            errorLoader(`Fallo en la subida de ${errores} archivo(s).${extraMsg}<br><span style="font-size:11px;color:#ffb3b3;margin-top:10px;display:block;">Detalle: ${ultimoErrorTxt}</span>`);
+        }
+    }
+
+    function cambiarVista(idVista) {
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+      document.getElementById(idVista).classList.add('active');
+    }
+    
+    function resetBtnError() {
+      const btn = document.getElementById("btnErrorLoader");
+      btn.className = "btn-action btn-error"; 
+      btn.style.background = ""; 
+      btn.innerHTML = "Cerrar y Revisar";
+    }
+
+    function mostrarLoader(titulo) {
+      ultimaVista = document.querySelector('.card.active') ? document.querySelector('.card.active').id : 'vistaLogin';
+      cambiarVista('vistaLoader');
+      document.getElementById("vistaLoader").classList.add("is-processing");
+      document.getElementById("btnErrorLoader").style.display = "none";
+      document.getElementById("btnExitoLoader").style.display = "none";
+      document.getElementById("loaderTitle").innerText = titulo;
+      document.getElementById("loaderTitle").style.color = "white";
+      let p = 2; actualizarUI({ progreso: p, mensaje: "Estableciendo conexión segura..." });
+      simuladorEnMarcha = setInterval(() => {
+        if (p < 85) { p += Math.floor(Math.random()*8)+2; if(p>85) p=85; actualizarUI({ progreso: p, mensaje: "Procesando datos cifrados..." }); }
+      }, 800);
+    }
+
+    function exitoLoader(html, sigVista) {
+      clearInterval(simuladorEnMarcha); 
+      actualizarUI({ progreso: 100, mensaje: "Completado." });
+      setTimeout(() => {
+        document.getElementById("vistaLoader").classList.remove("is-processing"); 
+        const t = document.getElementById("loaderTitle"); t.innerHTML = "¡Éxito! ✓"; t.style.color = "#00f260";
+        document.getElementById("progressBar").style.background = "#00f260";
+        const m = document.getElementById("message"); clearInterval(m.scrambleInterval); m.style.color = "#00f260"; m.innerHTML = html;
+        const b = document.getElementById("btnExitoLoader"); b.style.display = "flex"; b.onclick = () => cambiarVista(sigVista);
+      }, 500);
+    }
+
+    function errorLoader(msgError) {
+      clearInterval(simuladorEnMarcha); document.getElementById("vistaLoader").classList.remove("is-processing"); 
+      const t = document.getElementById("loaderTitle"); t.innerHTML = "Fallo del Sistema ⚠️"; t.style.color = "#ff6b6b";
+      document.getElementById("progressBar").style.background = "#ff416c"; document.getElementById("progressBar").innerHTML = "Error";
+      const m = document.getElementById("message"); clearInterval(m.scrambleInterval); m.style.color = "#ff8787"; m.innerHTML = `<b>${msgError}</b>`;
+      resetBtnError();
+      document.getElementById("btnErrorLoader").style.display = "flex";
+    }
+
+    function volverDeError() { 
+        document.getElementById("message").style.color = "#00f260"; 
+        document.getElementById("loginPassword").value = '';
+        resetBtnError();
+        cambiarVista('vistaApp'); 
+    }
+
+    function textScramble(e, t) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*<>{}\\[]'; let i = 0; clearInterval(e.scrambleInterval); 
+      e.scrambleInterval = setInterval(() => {
+        e.innerText = t.split('').map((l, x) => x < i ? l : chars[Math.floor(Math.random()*chars.length)]).join('');
+        if (i >= t.length) clearInterval(e.scrambleInterval); i += 0.5; 
+      }, 20);
+    }
+
+    function actualizarUI(d) { 
+        document.getElementById("progressBar").style.width = d.progreso+"%"; 
+        document.getElementById("progressBar").innerHTML = d.progreso+"%"; 
+        if(document.getElementById("message").dataset.current !== d.mensaje) { 
+            document.getElementById("message").dataset.current = d.mensaje; 
+            textScramble(document.getElementById("message"), d.mensaje); 
+        } 
+    }
+
+    let appVersionActual = "1.0.3";
+    
+    window.addEventListener("DOMContentLoaded", () => {
+        const metaTag = document.querySelector('meta[name="app-version"]');
+        if (metaTag) appVersionActual = metaTag.content;
+    });
+
+    async function checkForUpdates() {
+        try {
+            const url = window.location.href.split('?')[0] + '?t=' + Date.now();
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) return;
+            
+            const htmlText = await response.text();
+            
+            const match = htmlText.match(/<meta name="app-version"\s+content="([^"]+)">/);
+            if (match && match[1]) {
+                const versionRemota = match[1];
+                if (versionRemota !== appVersionActual) {
+                    document.getElementById('updateBanner').style.display = 'block';
+                }
+            }
+        } catch (e) {}
+    }
+
+    setInterval(checkForUpdates, 10 * 60 * 1000);
+    
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            checkForUpdates();
+        }
+    });
+  </script>
 </body>
 </html>
