@@ -449,38 +449,38 @@
     <h2 id="loaderTitle" class="neon-title" data-text="INICIANDO SISTEMA">INICIANDO SISTEMA</h2>
     <div class="message" id="message" data-current="">ESTABLECIENDO ENLACE...</div>
     <div class="progress-container"><div class="progress-bar" id="progressBar">0%</div></div>
-    <button id="btnErrorLoader" class="btn-action btn-error" style="display:none;" onclick="volverDeError()">ABORTAR CONEXIÓN</button>
-    <button id="btnExitoLoader" class="btn-action" style="display:none; border-color: var(--primary); box-shadow: 0 0 20px rgba(0,255,102,0.3);" onclick="volverDeExito()">ENTRAR AL SISTEMA</button>
+    <button id="btnErrorLoader" class="btn-action btn-error" style="display:none;" onclick="volverDeError()">REGRESAR</button>
+    <button id="btnExitoLoader" class="btn-action" style="display:none; border-color: var(--primary); box-shadow: 0 0 20px rgba(0,255,102,0.3);" onclick="volverDeExito()">CONTINUAR</button>
   </div>
 
   <!-- Vista Login -->
   <div class="card" id="vistaLogin">
-    <h2 class="neon-title" data-text="SISTEMA DE CONTROL">SISTEMA DE CONTROL</h2>
+    <h2 class="neon-title" data-text="BITÁCORA DE OBRA">BITÁCORA DE OBRA</h2>
     <p style="color: #64748b; font-size: 11px; margin-bottom: 25px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px;">AUTENTICACIÓN REQUERIDA</p>
     <div class="input-group">
-      <label>CREDENCIAL USUARIO</label>
+      <label>USUARIO</label>
       <input type="text" list="listaNombres" id="loginNombre" placeholder="BUSCAR IDENTIDAD..." autocomplete="off">
       <datalist id="listaNombres"></datalist>
     </div>
     <div class="input-group">
-      <label>CÓDIGO DE ACCESO</label>
+      <label>CONTRASEÑA</label>
       <input type="password" id="loginPassword" placeholder="••••••••">
     </div>
-    <button class="btn-action" onclick="iniciarSesion()">VALIDAR IDENTIDAD</button>
-    <span class="text-sm">¿ACCESO DENEGADO? <span class="link" onclick="cambiarVista('vistaRegistro')">SOLICITAR ALTA</span></span>
+    <button class="btn-action" onclick="iniciarSesion()">ACCEDER</button>
+    <span class="text-sm">¿ACCESO DENEGADO? <span class="link" onclick="cambiarVista('vistaRegistro')">REGISTRATE</span></span>
   </div>
 
   <!-- Vista Registro -->
   <div class="card" id="vistaRegistro">
-    <h2 class="neon-title" data-text="ALTA DE PERSONAL">ALTA DE PERSONAL</h2>
-    <p style="color: #64748b; font-size: 11px; margin-bottom: 20px; font-family: 'JetBrains Mono', monospace;">INGRESE DATOS PARA ENCRIPTACIÓN.</p>
-    <div class="input-group"><label>NOMBRE COMPLETO</label><input type="text" id="regNombre" placeholder="IDENTIDAD LEGAL"></div>
+    <h2 class="neon-title" data-text="REGISTRO DE PERSONAL">REGISTRO DE PERSONAL</h2>
+    <p style="color: #64748b; font-size: 11px; margin-bottom: 20px; font-family: 'JetBrains Mono', monospace;">INGRESE DATOS</p>
+    <div class="input-group"><label>NOMBRE COMPLETO</label><input type="text" id="regNombre" placeholder="EJEMPLO: YEISON HERRERA BLANDON"></div>
     <div class="input-group"><label>CÉDULA</label><input type="text" id="regCedula" placeholder="NÚMERO DE DOCUMENTO"></div>
-    <div class="input-group"><label>ENLACE DE COMUNICACIÓN (CORREO)</label><input type="email" id="regCorreo" placeholder="ejemplo@galias.com.co"></div>
+    <div class="input-group"><label>CORREO ELECTRÓNICO</label><input type="email" id="regCorreo" placeholder="ejemplo@galias.com.co"></div>
     <div class="input-group"><label>CARGO ASIGNADO</label><input type="text" id="regCargo" placeholder="ROL OPERATIVO"></div>
-    <div class="input-group"><label>SECTOR BASE (PROYECTO)</label><select id="regProyecto"></select></div>
-    <button class="btn-action" onclick="registrarUsuario()">TRANSMITIR SOLICITUD</button>
-    <button class="btn-action" style="border-color: rgba(255,255,255,0.2); box-shadow: none; color: #a0aec0;" onclick="cambiarVista('vistaLogin')">RETORNAR</button>
+    <div class="input-group"><label>PROYECTO ASIGNADO</label><select id="regProyecto"></select></div>
+    <button class="btn-action" onclick="registrarUsuario()">ENVIAR SOLICITUD</button>
+    <button class="btn-action" style="border-color: rgba(255,255,255,0.2); box-shadow: none; color: #a0aec0;" onclick="cambiarVista('vistaLogin')">REGRESAR</button>
   </div>
 
   <!-- Vista Reasignar Contraseña -->
@@ -495,7 +495,7 @@
   <!-- Vista Principal (App) -->
   <div class="card" id="vistaApp" style="max-width: 480px;">
     <div id="badgeModulo" class="modulo-badge">OBRA</div>
-    <h2 class="neon-title" data-text="MÓDULO TÁCTICO" style="font-size: 20px;">MÓDULO TÁCTICO</h2>
+    <h2 class="neon-title" data-text="MÓDULO DE REPORTE" style="font-size: 20px;">MÓDULO DE REPORTE</h2>
     
     <div class="user-tech-panel">
         <span id="infoUsuarioNombre" style="font-size: 14px; font-weight: 700; color: white; letter-spacing: 1px;">IDENTIDAD DESCONOCIDA</span><br>
@@ -503,27 +503,27 @@
         <span id="infoUsuarioCorreo" style="font-size: 11px; color: #64748b; font-family: 'JetBrains Mono';">correo@red.com</span>
     </div>
     
-    <div class="input-group"><label>PROYECTO OBJETIVO</label><select id="appProyecto" onchange="actualizarFrentes()"></select></div>
+    <div class="input-group"><label>PROYECTO DONDE SE REPORTA</label><select id="appProyecto" onchange="actualizarFrentes()"></select></div>
     
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
         <div class="input-group"><label>FRENTE</label><select id="appFrente"><option value="">SELECCIONE...</option></select></div>
-        <div class="input-group"><label>COORDENADAS (UBICACIÓN)</label><input type="text" id="appUbicacion" placeholder="EJ. ZANJA NORTE"></div>
+        <div class="input-group"><label>UBICACIÓN</label><input type="text" id="appUbicacion" placeholder="EJ. ZANJA NORTE"></div>
     </div>
     
-    <div class="input-group" style="margin-top: 10px;"><label>BITÁCORA / REPORTES</label><textarea id="appDescripcion" rows="3" placeholder="Registrar detalles operativos..."></textarea></div>
+    <div class="input-group" style="margin-top: 10px;"><label>DESCRIPCIÓN</label><textarea id="appDescripcion" rows="3" placeholder="Registrar detalles operativos..."></textarea></div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
         <input type="file" id="inputFoto" accept="image/*" capture="environment">
-        <button class="btn-action btn-foto" onclick="document.getElementById('inputFoto').click()" style="margin-top: 0;">📸 CAPTURA VISUAL</button>
+        <button class="btn-action btn-foto" onclick="document.getElementById('inputFoto').click()" style="margin-top: 0;">📸 TOMAR FOTO</button>
         
         <input type="file" id="inputVideo" accept="video/*" capture="environment">
-        <button class="btn-action btn-video" onclick="document.getElementById('inputVideo').click()" style="margin-top: 0;">🎥 REGISTRO CINETICO</button>
+        <button class="btn-action btn-video" onclick="document.getElementById('inputVideo').click()" style="margin-top: 0;">🎥 TOMAR VIDEO</button>
     </div>
     
     <input type="file" id="inputGaleria" accept="image/*,video/*" multiple>
-    <button class="btn-action btn-galeria" onclick="document.getElementById('inputGaleria').click()" style="margin-top: 0; margin-bottom: 12px;">📁 EXTRAER DE BANCO DE DATOS</button>
+    <button class="btn-action btn-galeria" onclick="document.getElementById('inputGaleria').click()" style="margin-top: 0; margin-bottom: 12px;">📁 ADJUNTAR DESDE GALERÍA</button>
 
-    <button id="btnGrabarAudio" class="btn-action" style="margin-top: 0; border-color: #f59e0b; color: #f59e0b;">🎤 INICIAR TRANSMISIÓN VOCAL</button>
+    <button id="btnGrabarAudio" class="btn-action" style="margin-top: 0; border-color: #f59e0b; color: #f59e0b;">🎤 GRABAR AUDIO</button>
     
     <!-- Controles de Audio Holográficos -->
     <div id="audioControls" style="display: none; align-items: center; justify-content: center; gap: 20px; margin-top: 20px; margin-bottom: 10px; background: rgba(245, 158, 11, 0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.2);">
@@ -533,15 +533,15 @@
 
     <!-- Cola de archivos -->
     <div class="queue-container">
-        <label style="color:var(--secondary); margin-bottom: 15px;">PAQUETES ENCRIPTADOS (<span id="queueCount" style="color: white;">0</span>)</label>
-        <div id="queueList" style="font-size: 11px; color: #64748b; font-style: normal;">VACÍO. SIN PAQUETES.</div>
-        <button id="btnEnviarReporte" class="btn-action" style="margin-top: 25px; display: none; background: rgba(0, 255, 102, 0.1);" onclick="enviarReporteEnCola()">🚀 INICIAR SUBIDA A SATÉLITE</button>
+        <label style="color:var(--secondary); margin-bottom: 15px;">ARCHIVOS EN ESPERA (<span id="queueCount" style="color: white;">0</span>)</label>
+        <div id="queueList" style="font-size: 11px; color: #64748b; font-style: normal;">VACÍO. SIN ARCHIVOS.</div>
+        <button id="btnEnviarReporte" class="btn-action" style="margin-top: 25px; display: none; background: rgba(0, 255, 102, 0.1);" onclick="enviarReporteEnCola()">🚀 INICIAR SUBIDA A CARPETAS</button>
     </div>
 
-    <div style="margin-top: 30px; text-align: center;"><span class="link text-sm" style="color: #ff3366; margin-top:0; text-shadow: 0 0 5px rgba(255,51,102,0.4);" onclick="cerrarSesion()">DESCONECTAR SESIÓN</span></div>
+    <div style="margin-top: 30px; text-align: center;"><span class="link text-sm" style="color: #ff3366; margin-top:0; text-shadow: 0 0 5px rgba(255,51,102,0.4);" onclick="cerrarSesion()">CERRAR SESIÓN</span></div>
   </div>
 
-  <div class="footer">⚡ SISTEMA OPERATIVO GALIAS ⚡</div>
+  <div class="footer">⚡ DESARROLLO - OBRAS MANIZALES ⚡</div>
 
   <script>
     const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbw11I8G9sHoBpw9i-jShL1rCm2kAOq0EvkCU4vjL44KcZbc_0OzqEVMEtS_UAb3oezp/exec'; 
@@ -748,9 +748,9 @@
       const nombre = document.getElementById('loginNombre').value.trim().toUpperCase();
       const password = document.getElementById('loginPassword').value.trim();
       
-      if(!nombre || !password) return showToast("Por favor ingresa Identidad y Código.");
+      if(!nombre || !password) return showToast("Por favor ingresa Usuario y Contraseña.");
       
-      mostrarLoader("VALIDANDO IDENTIDAD...");
+      mostrarLoader("VALIDANDO INFORMACIÓN...");
       try {
         const r = await fetch(URL_APPS_SCRIPT, { method: 'POST', body: JSON.stringify({ action: 'login', nombre: nombre, password: password }) });
         const res = await r.json();
@@ -939,7 +939,7 @@
                               mp3Blob = encodeToMP3FromBuffer(pcmData, TARGET_SAMPLE_RATE);
                               if (mp3Blob.size < 5000) { 
                                   mp3Blob = null; 
-                                  throw new Error("Paquete corrupto."); 
+                                  throw new Error("Archivo corrupto."); 
                               }
                           } catch (encErr) { 
                               if (intentos >= MAX_INTENTOS) throw new Error("Fallo de compresión."); 
@@ -1023,7 +1023,7 @@
         for (let i = 0; i < files.length; i++) {
             const archivo = files[i];
             if (archivo.size > 40 * 1024 * 1024) { 
-                showToast(`El paquete ${archivo.name} excede el límite (40MB).`); 
+                showToast(`El archivo ${archivo.name} excede el límite (40MB).`); 
                 continue; 
             }
             let tipo = archivo.type.includes('video') ? 'Video' : 'Foto';
@@ -1039,7 +1039,7 @@
       const archivo = e.target.files[0]; 
       if (!archivo) return;
       if (archivo.size > 40 * 1024 * 1024) { 
-          showToast(`Límite de paquete excedido (40MB).`); 
+          showToast(`Límite de archivo excedido (40MB).`); 
           e.target.value = ""; 
           return; 
       }
@@ -1072,7 +1072,7 @@
         countSpan.innerText = archivosQueue.length;
         
         if(archivosQueue.length === 0) {
-            queueList.innerHTML = "VACÍO. SIN PAQUETES."; 
+            queueList.innerHTML = "VACÍO. SIN ARCHIVOS."; 
             document.getElementById('btnEnviarReporte').style.display = 'none'; 
             return;
         }
@@ -1093,7 +1093,7 @@
                 <div style="text-align: left; display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 18px;">${icon}</span>
                     <div style="display:flex; flex-direction:column;">
-                        <span>Paquete ${item.tipo} ${index + 1}</span>
+                        <span>Archivo ${item.tipo} ${index + 1}</span>
                         ${failBadge}
                     </div>
                 </div> 
@@ -1149,15 +1149,15 @@
         
         if(!proyectoElegido) return showToast("Definir PROYECTO OBJETIVO.");
         if(!frente) return showToast("Definir FRENTE.");
-        if(!ubicacion) return showToast("Definir COORDENADAS.");
-        if(archivosQueue.length === 0) return showToast("No hay paquetes para enviar.");
+        if(!ubicacion) return showToast("Definir UBICACIÓN.");
+        if(archivosQueue.length === 0) return showToast("No hay archivos para enviar.");
 
         const infoProy = dbProyectos[proyectoElegido]; 
         const sigla = infoProy ? infoProy.sigla : "S-S";
         const fecha = obtenerFechaFormateada(); 
         const modulo = usuarioActual.modulo || "OBRA";
 
-        mostrarLoader("ENLAZANDO CON SATÉLITE...");
+        mostrarLoader("ENLAZANDO CON CARPETAS...");
         
         let archivosAEnviar = [...archivosQueue]; 
         let archivosRestantesEnCola = []; 
@@ -1187,7 +1187,7 @@
             });
             const resTg = await rTg.json();
             if (resTg.estado === "error") {
-                return errorLoader(`Falla de satélite.<br><span style="font-size:10px;color:var(--accent);margin-top:10px;display:block;">${resTg.mensaje}</span>`);
+                return errorLoader(`Falla de conexión.<br><span style="font-size:10px;color:var(--accent);margin-top:10px;display:block;">${resTg.mensaje}</span>`);
             }
         } catch(e) {}
 
@@ -1196,7 +1196,7 @@
         if (archivosAEnviar.length > 0) {
             for(let i = 0; i < archivosAEnviar.length; i++) {
                 let item = archivosAEnviar[i];
-                actualizarUI({ progreso: Math.floor(((i)/archivosAEnviar.length)*80), mensaje: `Transmitiendo paquete ${i+1}/${archivosAEnviar.length}...` });
+                actualizarUI({ progreso: Math.floor(((i)/archivosAEnviar.length)*80), mensaje: `Transmitiendo archivos ${i+1}/${archivosAEnviar.length}...` });
                 contadoresSubida[item.tipo]++;
                 
                 let nombreFinal = `${sigla}-${frente}-${ubicacion}-${fecha}_${modulo}_${item.tipo.toUpperCase()}${contadoresSubida[item.tipo]}.${item.extension}`;
@@ -1230,7 +1230,7 @@
         let subidosExito = archivosAEnviar.length - errores;
 
         if (subidosExito > 0) {
-            actualizarUI({ progreso: 90, mensaje: "Grabando telemetría..." });
+            actualizarUI({ progreso: 90, mensaje: "Procesando Audios..." });
             try { 
                 await fetch(URL_APPS_SCRIPT, { 
                     method: 'POST', 
@@ -1251,16 +1251,16 @@
 
         if(errores === 0) {
             let tgUrl = getTelegramGroupUrl(proyectoElegido, modulo);
-            let btnTelegramHTML = `<br><br><span style="color:var(--secondary); font-size:11px; font-family:'JetBrains Mono';">DATOS RECIBIDOS.</span><br><button class="btn-action btn-telegram" style="margin-top:10px;" onclick="abrirTelegram('${tgUrl}')">📡 ABRIR COMUNICACIÓN (TG)</button>`;
+            let btnTelegramHTML = `<br><br><span style="color:var(--secondary); font-size:11px; font-family:'JetBrains Mono';">DATOS RECIBIDOS.</span><br><button class="btn-action btn-telegram" style="margin-top:10px;" onclick="abrirTelegram('${tgUrl}')">📡 ABRIR TELEGRAM (TG)</button>`;
             
             localStorage.removeItem('reporteDraft'); 
             document.getElementById('appUbicacion').value = ''; 
             document.getElementById('appDescripcion').value = '';
             
-            exitoLoader(`TRANSMISIÓN EXITOSA.${btnTelegramHTML}`, 'vistaApp');
+            exitoLoader(`TRANSMISIÓN FINALIZADA.${btnTelegramHTML}`, 'vistaApp');
         } else {
-            let extraMsg = subidosExito > 0 ? `<br><br><span style="color:var(--primary); font-size:11px; font-family:'JetBrains Mono';">${subidosExito} PAQUETES RECIBIDOS. RESTO EN ESPERA.</span>` : '';
-            errorLoader(`FALLA EN ${errores} PAQUETE(S).${extraMsg}<br><span style="font-size:10px;color:var(--accent);margin-top:10px;display:block;">${ultimoErrorTxt}</span>`);
+            let extraMsg = subidosExito > 0 ? `<br><br><span style="color:var(--primary); font-size:11px; font-family:'JetBrains Mono';">${subidosExito} ARCHIVOS RECIBIDOS. RESTO EN ESPERA.</span>` : '';
+            errorLoader(`FALLA EN ${errores} ARCHIVO(S).${extraMsg}<br><span style="font-size:10px;color:var(--accent);margin-top:10px;display:block;">${ultimoErrorTxt}</span>`);
         }
     }
 
@@ -1273,7 +1273,7 @@
         const btn = document.getElementById("btnErrorLoader"); 
         btn.className = "btn-action btn-error"; 
         btn.style.background = ""; 
-        btn.innerHTML = "ABORTAR CONEXIÓN"; 
+        btn.innerHTML = "REGRESAR"; 
     }
 
     function mostrarLoader(titulo) {
@@ -1294,7 +1294,7 @@
           if (p < 85) { 
               p += Math.floor(Math.random()*8)+2; 
               if(p>85) p=85; 
-              actualizarUI({ progreso: p, mensaje: "Procesando algoritmos..." }); 
+              actualizarUI({ progreso: p, mensaje: "Procesando..." }); 
           } 
       }, 800);
     }
@@ -1307,7 +1307,7 @@
         document.getElementById("vistaLoader").classList.remove("is-processing"); 
         
         const t = document.getElementById("loaderTitle"); 
-        t.innerHTML = "ENLACE ESTABLECIDO"; 
+        t.innerHTML = "CARGUE EXITOSO"; 
         t.style.color = "var(--primary)";
         t.style.textShadow = "0 0 15px rgba(0,255,102,0.8)";
         
@@ -1329,7 +1329,7 @@
       document.getElementById("vistaLoader").classList.remove("is-processing"); 
       
       const t = document.getElementById("loaderTitle"); 
-      t.innerHTML = "FALLA CRÍTICA"; 
+      t.innerHTML = "ERROR DE CONEXIÓN"; 
       t.style.color = "var(--accent)";
       t.style.textShadow = "0 0 15px rgba(255,0,85,0.8)";
       
