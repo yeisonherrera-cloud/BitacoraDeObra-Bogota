@@ -180,6 +180,7 @@
         text-transform: uppercase;
         box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
     }
+    
     input[type="text"], input[type="password"], input[type="email"], input:not([type]), select { 
         white-space: nowrap; 
         overflow: hidden; 
@@ -234,6 +235,7 @@
         transition: all 0.5s ease;
         z-index: -1;
     }
+    
     .btn-action:hover::before { left: 100%; }
     
     .btn-action:hover { 
@@ -335,6 +337,7 @@
         background-size: 28px 28px;
         animation: moveStripes 1s linear infinite;
     }
+    
     @keyframes moveStripes { 0% { background-position: 0 0; } 100% { background-position: 28px 0; } }
 
     .text-sm { font-size: 12px; color: #64748b; margin-top: 15px; display: block; font-family: 'JetBrains Mono', monospace; }
@@ -1342,11 +1345,12 @@
       document.getElementById("btnErrorLoader").style.display = "flex";
     }
 
+    /* CORRECCIÓN: Ahora utilizamos ultimaVista para que no envíe forzosamente a vistaApp cuando falla el login */
     function volverDeError() { 
         document.getElementById("message").style.color = "var(--primary)"; 
         document.getElementById("loginPassword").value = ''; 
         resetBtnError(); 
-        cambiarVista('vistaApp'); 
+        cambiarVista(ultimaVista || 'vistaLogin'); 
     }
 
     function textScramble(e, t) {
