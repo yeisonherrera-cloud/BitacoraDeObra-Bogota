@@ -535,7 +535,7 @@
     <div class="queue-container">
         <label style="color:var(--secondary); margin-bottom: 15px;">ARCHIVOS EN ESPERA (<span id="queueCount" style="color: white;">0</span>)</label>
         <div id="queueList" style="font-size: 11px; color: #64748b; font-style: normal;">VACÍO. SIN ARCHIVOS.</div>
-        <button id="btnEnviarReporte" class="btn-action" style="margin-top: 25px; display: none; background: rgba(0, 255, 102, 0.1);" onclick="enviarReporteEnCola()">🚀 INICIAR SUBIDA A CARPETAS</button>
+        <button id="btnEnviarReporte" class="btn-action" style="margin-top: 25px; display: none; background: rgba(0, 255, 102, 0.1);" onclick="enviarReporteEnCola()">🚀 CONFIRMAR Y ENVIAR</button>
     </div>
 
     <div style="margin-top: 30px; text-align: center;"><span class="link text-sm" style="color: #ff3366; margin-top:0; text-shadow: 0 0 5px rgba(255,51,102,0.4);" onclick="cerrarSesion()">CERRAR SESIÓN</span></div>
@@ -750,7 +750,7 @@
       
       if(!nombre || !password) return showToast("Por favor ingresa Usuario y Contraseña.");
       
-      mostrarLoader("VALIDANDO INFORMACIÓN...");
+      mostrarLoader("VALIDANDO INFORMACIÓN");
       try {
         const r = await fetch(URL_APPS_SCRIPT, { method: 'POST', body: JSON.stringify({ action: 'login', nombre: nombre, password: password }) });
         const res = await r.json();
@@ -792,16 +792,16 @@
         const proyecto = document.getElementById('regProyecto').value;
         
         if(!cedula || !nombre) return showToast("Cédula e Identidad requeridas.");
-        if (!validarCorreoRegex(correo)) return showToast("Enlace de comunicación inválido.");
+        if (!validarCorreoRegex(correo)) return showToast("Correo Electronico inválido.");
 
-        mostrarLoader("TRANSMITIENDO DATOS...");
+        mostrarLoader("TRANSMITIENDO INFORMACIÓN...");
         try {
             const r = await fetch(URL_APPS_SCRIPT, { method: 'POST', body: JSON.stringify({ action: 'register', cedula, nombre, correo, cargo, proyecto }) });
             const res = await r.json();
             
             if(res.estado === 'exito') {
                 ['regCedula','regNombre','regCorreo','regCargo'].forEach(id => document.getElementById(id).value = '');
-                exitoLoader(`DATOS RECIBIDOS EN LA CENTRAL.`, 'vistaLogin');
+                exitoLoader(`DATOS RECIBIDOS POR EL ADMINISTRADOR.`, 'vistaLogin');
             } else if (res.estado === 'duplicado') {
                 cedulaParaReasignar = cedula; 
                 clearInterval(simuladorEnMarcha); 
@@ -817,7 +817,7 @@
 
     async function enviarReasignacion() {
         const nuevoCorreo = document.getElementById('reasignarCorreo').value.trim().toUpperCase();
-        if (nuevoCorreo !== "" && !validarCorreoRegex(nuevoCorreo)) return showToast("Enlace de comunicación inválido.");
+        if (nuevoCorreo !== "" && !validarCorreoRegex(nuevoCorreo)) return showToast("Correo Electrónico inválido.");
 
         mostrarLoader("ENVIANDO ALERTA...");
         try {
