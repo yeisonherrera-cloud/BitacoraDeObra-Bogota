@@ -516,7 +516,7 @@
   <!-- Vista Principal (App) -->
   <div class="card" id="vistaApp" style="max-width: 480px;">
     <div id="badgeModulo" class="modulo-badge">OBRA</div>
-    <h2 class="glitch-title" data-text="MÓDULO TÁCTICO" style="font-size: 20px;">MÓDULO TÁCTICO</h2>
+    <h2 class="glitch-title" data-text="MÓDULO DE REPORTE" style="font-size: 20px;">MÓDULO DE REPORTE</h2>
     
     <div class="user-tech-panel">
         <span id="infoUsuarioNombre" style="font-size: 14px; font-weight: 700; color: white; letter-spacing: 1px;">IDENTIDAD DESCONOCIDA</span><br>
@@ -524,25 +524,25 @@
         <span id="infoUsuarioCorreo" style="font-size: 11px; color: #64748b; font-family: 'JetBrains Mono';">correo@red.com</span>
     </div>
     
-    <div class="input-group"><label>PROYECTO OBJETIVO</label><select id="appProyecto" onchange="actualizarFrentes()"></select></div>
+    <div class="input-group"><label>PROYECTO DONDE SE REPORTA</label><select id="appProyecto" onchange="actualizarFrentes()"></select></div>
     
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
         <div class="input-group"><label>FRENTE</label><select id="appFrente"><option value="">SELECCIONE...</option></select></div>
-        <div class="input-group"><label>COORDENADAS (UBICACIÓN)</label><input type="text" id="appUbicacion" placeholder="EJ. ZANJA NORTE"></div>
+        <div class="input-group"><label>UBICACIÓN</label><input type="text" id="appUbicacion" placeholder="EJ. ZANJA NORTE"></div>
     </div>
     
-    <div class="input-group" style="margin-top: 10px;"><label>BITÁCORA / REPORTES</label><textarea id="appDescripcion" rows="3" placeholder="Registrar detalles operativos..."></textarea></div>
+    <div class="input-group" style="margin-top: 10px;"><label>DESCRIPCIÓN</label><textarea id="appDescripcion" rows="3" placeholder="Registrar detalles operativos..."></textarea></div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
         <input type="file" id="inputFoto" accept="image/*" capture="environment">
-        <button class="btn-action btn-foto" onclick="document.getElementById('inputFoto').click()" style="margin-top: 0;">📸 CAPTURA VISUAL</button>
+        <button class="btn-action btn-foto" onclick="document.getElementById('inputFoto').click()" style="margin-top: 0;">📸 TOMAR FOTO</button>
         
         <input type="file" id="inputVideo" accept="video/*" capture="environment">
-        <button class="btn-action btn-video" onclick="document.getElementById('inputVideo').click()" style="margin-top: 0;">🎥 REGISTRO CINETICO</button>
+        <button class="btn-action btn-video" onclick="document.getElementById('inputVideo').click()" style="margin-top: 0;">🎥 TOMAR VIDEO</button>
     </div>
     
     <input type="file" id="inputGaleria" accept="image/*,video/*" multiple>
-    <button class="btn-action btn-galeria" onclick="document.getElementById('inputGaleria').click()" style="margin-top: 0; margin-bottom: 12px;">📁 EXTRAER DE BANCO DE DATOS</button>
+    <button class="btn-action btn-galeria" onclick="document.getElementById('inputGaleria').click()" style="margin-top: 0; margin-bottom: 12px;">📁 ADJUNTAR DESDE GALERÍA</button>
 
     <button id="btnGrabarAudio" class="btn-action" style="margin-top: 0; border-color: #f59e0b; color: #f59e0b;">🎤 INICIAR TRANSMISIÓN VOCAL</button>
     
@@ -554,12 +554,12 @@
 
     <!-- Cola de archivos -->
     <div class="queue-container">
-        <label style="color:var(--secondary); margin-bottom: 15px;">PAQUETES ENCRIPTADOS (<span id="queueCount" style="color: white;">0</span>)</label>
-        <div id="queueList" style="font-size: 11px; color: #64748b; font-style: normal;">VACÍO. SIN PAQUETES.</div>
-        <button id="btnEnviarReporte" class="btn-action" style="margin-top: 25px; display: none; background: rgba(0, 255, 102, 0.1);" onclick="enviarReporteEnCola()">🚀 INICIAR SUBIDA A SATÉLITE</button>
+        <label style="color:var(--secondary); margin-bottom: 15px;">ARCHIVOS EN ESPERA (<span id="queueCount" style="color: white;">0</span>)</label>
+        <div id="queueList" style="font-size: 11px; color: #64748b; font-style: normal;">VACÍO. SIN ARCHIVOS.</div>
+        <button id="btnEnviarReporte" class="btn-action" style="margin-top: 25px; display: none; background: rgba(0, 255, 102, 0.1);" onclick="enviarReporteEnCola()">🚀 CONFIRMAR Y ENVIAR</button>
     </div>
 
-    <div style="margin-top: 30px; text-align: center;"><span class="link text-sm" style="color: #ff3366; margin-top:0; text-shadow: 0 0 5px rgba(255,51,102,0.4);" onclick="cerrarSesion()">DESCONECTAR SESIÓN</span></div>
+    <div style="margin-top: 30px; text-align: center;"><span class="link text-sm" style="color: #ff3366; margin-top:0; text-shadow: 0 0 5px rgba(255,51,102,0.4);" onclick="cerrarSesion()">CERRAR SESIÓN</span></div>
   </div>
 
   <div class="footer">⚡ SISTEMA OPERATIVO GALIAS ⚡</div>
@@ -1136,7 +1136,7 @@
         countSpan.innerText = archivosQueue.length;
         
         if(archivosQueue.length === 0) {
-            queueList.innerHTML = "VACÍO. SIN PAQUETES."; 
+            queueList.innerHTML = "VACÍO. SIN ARCHIVOS."; 
             document.getElementById('btnEnviarReporte').style.display = 'none'; 
             return;
         }
