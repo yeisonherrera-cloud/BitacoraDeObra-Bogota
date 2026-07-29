@@ -6,7 +6,7 @@
   <meta name="app-version" content="1.0.4">
   <title>Plataforma de Registro y Captura</title>
   
-  <!-- Fuentes -->
+  <!-- Fuentes: Inter para legibilidad, JetBrains Mono para toques Tech -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   
   <!-- LIBRERÍA LAMEJS PARA UNIFICAR TODOS LOS AUDIOS A FORMATO MP3 -->
@@ -180,6 +180,7 @@
         text-transform: uppercase;
         box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
     }
+    
     input[type="text"], input[type="password"], input[type="email"], input:not([type]), select { 
         white-space: nowrap; 
         overflow: hidden; 
@@ -234,6 +235,7 @@
         transition: all 0.5s ease;
         z-index: -1;
     }
+    
     .btn-action:hover::before { left: 100%; }
     
     .btn-action:hover { 
@@ -275,7 +277,7 @@
         100% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0), inset 0 0 15px rgba(255, 0, 85, 0.5); } 
     }
 
-    /* Textos, Glitch y Loader */
+    /* Textos, Decodificación y Loader */
     .logo-wrapper { position: relative; display: inline-block; margin-bottom: 25px; }
     .logo-wrapper img { 
         width: 160px; 
@@ -285,44 +287,6 @@
         filter: drop-shadow(0 0 15px rgba(0, 204, 255, 0.3));
     }
     
-    /* EFECTO GLITCH EN TÍTULOS */
-    .glitch-title {
-        margin-top: 0; 
-        font-size: 24px; 
-        font-weight: 700; 
-        color: white;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        position: relative;
-        text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
-    }
-    .glitch-title::before, .glitch-title::after {
-        content: attr(data-text);
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: var(--card-bg);
-    }
-    .glitch-title::before {
-        left: 2px;
-        text-shadow: -2px 0 var(--accent);
-        clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-        animation: glitch-anim 3s infinite linear alternate-reverse;
-    }
-    .glitch-title::after {
-        left: -2px;
-        text-shadow: -2px 0 var(--secondary);
-        clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
-        animation: glitch-anim 2.5s infinite linear alternate-reverse;
-    }
-    @keyframes glitch-anim {
-        0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
-        20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
-        40% { clip-path: inset(40% 0 50% 0); transform: translate(1px, 2px); }
-        60% { clip-path: inset(80% 0 5% 0); transform: translate(-1px, -2px); }
-        80% { clip-path: inset(10% 0 70% 0); transform: translate(2px, 1px); }
-        100% { clip-path: inset(30% 0 40% 0); transform: translate(-2px, -1px); }
-    }
-
     .message { 
         margin: 15px 0; 
         min-height: 20px; 
@@ -359,6 +323,7 @@
         background-size: 28px 28px;
         animation: moveStripes 1s linear infinite;
     }
+    
     @keyframes moveStripes { 0% { background-position: 0 0; } 100% { background-position: 28px 0; } }
 
     .text-sm { font-size: 12px; color: #64748b; margin-top: 15px; display: block; font-family: 'JetBrains Mono', monospace; }
@@ -432,32 +397,16 @@
         font-family: 'JetBrains Mono', monospace; backdrop-filter: blur(10px);
     }
     #toastNotification.show { bottom: 40px; }
-    
-    /* Info Usuario Panel Tech */
-    .user-tech-panel {
-        background: linear-gradient(135deg, rgba(0, 204, 255, 0.05), transparent);
-        padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: left; 
-        border-left: 3px solid var(--secondary);
-        border-top: 1px solid rgba(0, 204, 255, 0.1);
-        border-bottom: 1px solid rgba(0, 204, 255, 0.1);
-        position: relative; overflow: hidden;
-    }
-    .user-tech-panel::after {
-        content: ''; position: absolute; right: 10px; top: 10px; opacity: 0.1;
-        width: 40px; height: 40px;
-        background: radial-gradient(circle, var(--secondary) 0%, transparent 70%);
-        animation: pulseGlow 2s infinite alternate;
-    }
   </style>
 </head>
 <body>
   
-  <div id="updateBanner" onclick="window.location.reload(true)">⚡ ACTUALIZACIÓN DE SISTEMA DETECTADA. REINICIAR ⚡</div>
+  <div id="updateBanner" onclick="window.location.reload(true)">🚀 Nueva versión disponible. Toca aquí para actualizar 🚀</div>
   
   <!-- Modal de Vista Previa -->
-  <div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2, 5, 7, 0.9); z-index:999999; justify-content:center; align-items:center; flex-direction:column; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
-      <button onclick="cerrarVistaPrevia()" style="position:absolute; top:25px; right:30px; background:rgba(255, 0, 85, 0.1); border:1px solid var(--accent); color:var(--accent); font-size:24px; cursor:pointer; width:45px; height:45px; border-radius:8px; display:flex; justify-content:center; align-items:center; box-shadow: 0 0 15px rgba(255, 0, 85, 0.3); z-index:1000000; transition: all 0.3s; font-family: 'JetBrains Mono', monospace;">X</button>
-      <div id="previewContent" style="max-width:90%; max-height:80%; display:flex; justify-content:center; align-items:center; border: 1px solid rgba(0, 204, 255, 0.3); padding: 5px; border-radius: 12px; box-shadow: 0 0 30px rgba(0, 204, 255, 0.1);"></div>
+  <div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; justify-content:center; align-items:center; flex-direction:column; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+      <button onclick="cerrarVistaPrevia()" style="position:absolute; top:20px; right:25px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; font-size:24px; cursor:pointer; width:40px; height:40px; border-radius:50%; display:flex; justify-content:center; align-items:center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index:1000000; transition: all 0.3s;">×</button>
+      <div id="previewContent" style="max-width:90%; max-height:80%; display:flex; justify-content:center; align-items:center;"></div>
   </div>
 
   <div id="toastNotification">Mensaje de prueba</div>
@@ -467,102 +416,102 @@
   <!-- Vista Loader -->
   <div class="card active" id="vistaLoader">
     <div class="logo-wrapper"><img src="https://lh3.googleusercontent.com/d/1TsBi-7jTXIUG4j9uNDBDu5gwxoTrHUq7" onerror="this.style.display='none'"></div>
-    <h2 id="loaderTitle" class="glitch-title" data-text="INICIANDO SISTEMA">INICIANDO SISTEMA</h2>
-    <div class="message" id="message" data-current="">ESTABLECIENDO ENLACE...</div>
+    <h2 id="loaderTitle">Iniciando Sistema</h2>
+    <div class="message" id="message" data-current="">Conectando con base de datos...</div>
     <div class="progress-container"><div class="progress-bar" id="progressBar">0%</div></div>
-    <button id="btnErrorLoader" class="btn-action btn-error" style="display:none;" onclick="volverDeError()">ABORTAR CONEXIÓN</button>
-    <button id="btnExitoLoader" class="btn-action" style="display:none; border-color: var(--primary); box-shadow: 0 0 20px rgba(0,255,102,0.3);" onclick="volverDeExito()">ENTRAR AL SISTEMA</button>
+    <button id="btnErrorLoader" class="btn-action btn-error" style="display:none;" onclick="volverDeError()">Cerrar y Revisar</button>
+    <button id="btnExitoLoader" class="btn-action" style="display:none; background: linear-gradient(135deg, #00f260, #0575e6);" onclick="volverDeExito()">Continuar</button>
   </div>
 
   <!-- Vista Login -->
   <div class="card" id="vistaLogin">
-    <h2 class="glitch-title" data-text="SISTEMA DE CONTROL">SISTEMA DE CONTROL</h2>
-    <p style="color: #64748b; font-size: 11px; margin-bottom: 25px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px;">AUTENTICACIÓN REQUERIDA</p>
+    <h2>Sistema de Control</h2>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 25px;">Identificación de Personal Autorizado</p>
     <div class="input-group">
-      <label>CREDENCIAL USUARIO</label>
-      <input type="text" list="listaNombres" id="loginNombre" placeholder="BUSCAR IDENTIDAD..." autocomplete="off">
+      <label>USUARIO</label>
+      <input type="text" list="listaNombres" id="loginNombre" placeholder="Buscar nombre..." autocomplete="off">
       <datalist id="listaNombres"></datalist>
     </div>
     <div class="input-group">
-      <label>CÓDIGO DE ACCESO</label>
+      <label>CONTRASEÑA</label>
       <input type="password" id="loginPassword" placeholder="••••••••">
     </div>
-    <button class="btn-action" onclick="iniciarSesion()">VALIDAR IDENTIDAD</button>
-    <span class="text-sm">¿ACCESO DENEGADO? <span class="link" onclick="cambiarVista('vistaRegistro')">SOLICITAR ALTA</span></span>
+    <button class="btn-action" onclick="iniciarSesion()">ACCEDER AL SISTEMA</button>
+    <span class="text-sm">¿No tienes cuenta? <span class="link" onclick="cambiarVista('vistaRegistro')">Solicitar Registro</span></span>
   </div>
 
   <!-- Vista Registro -->
   <div class="card" id="vistaRegistro">
-    <h2 class="glitch-title" data-text="ALTA DE PERSONAL">ALTA DE PERSONAL</h2>
-    <p style="color: #64748b; font-size: 11px; margin-bottom: 20px; font-family: 'JetBrains Mono', monospace;">INGRESE DATOS PARA ENCRIPTACIÓN.</p>
-    <div class="input-group"><label>NOMBRE COMPLETO</label><input type="text" id="regNombre" placeholder="IDENTIDAD LEGAL"></div>
-    <div class="input-group"><label>CÉDULA</label><input type="text" id="regCedula" placeholder="NÚMERO DE DOCUMENTO"></div>
-    <div class="input-group"><label>ENLACE DE COMUNICACIÓN (CORREO)</label><input type="email" id="regCorreo" placeholder="ejemplo@galias.com.co"></div>
-    <div class="input-group"><label>CARGO ASIGNADO</label><input type="text" id="regCargo" placeholder="ROL OPERATIVO"></div>
-    <div class="input-group"><label>SECTOR BASE (PROYECTO)</label><select id="regProyecto"></select></div>
-    <button class="btn-action" onclick="registrarUsuario()">TRANSMITIR SOLICITUD</button>
-    <button class="btn-action" style="border-color: rgba(255,255,255,0.2); box-shadow: none; color: #a0aec0;" onclick="cambiarVista('vistaLogin')">RETORNAR</button>
+    <h2>Nuevo Personal</h2>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Ingrese sus datos para validación.</p>
+    <div class="input-group"><label>NOMBRE COMPLETO</label><input type="text" id="regNombre" placeholder="Nombres y Apellidos"></div>
+    <div class="input-group"><label>CÉDULA</label><input type="text" id="regCedula" placeholder="Número de documento"></div>
+    <div class="input-group"><label>CORREO ELECTRÓNICO</label><input type="email" id="regCorreo" placeholder="ejemplo@galias.com.co"></div>
+    <div class="input-group"><label>CARGO</label><input type="text" id="regCargo" placeholder="Ej. Maestro de Obra"></div>
+    <div class="input-group"><label>PROYECTO ASIGNADO</label><select id="regProyecto"></select></div>
+    <button class="btn-action" onclick="registrarUsuario()">ENVIAR SOLICITUD</button>
+    <button class="btn-action" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="cambiarVista('vistaLogin')">Volver al Inicio</button>
   </div>
 
   <!-- Vista Reasignar Contraseña -->
   <div class="card" id="vistaReasignar">
-    <h2 class="glitch-title" data-text="CUENTA EXISTENTE" style="color: var(--secondary);">CUENTA EXISTENTE</h2>
-    <p style="color: #94a3b8; font-size: 12px; margin-bottom: 20px; line-height: 1.6; font-family: 'JetBrains Mono', monospace;">Identidad ya registrada en la base de datos central. ¿Requiere un reseteo de código de acceso?</p>
-    <div class="input-group"><label>ACTUALIZAR ENLACE (NUEVO CORREO)</label><input type="email" id="reasignarCorreo" placeholder="Opcional. Llenar si cambió"></div>
-    <button class="btn-action btn-warning" onclick="enviarReasignacion()">CONFIRMAR RESETEO</button>
-    <button class="btn-action" style="border-color: rgba(255,255,255,0.2); box-shadow: none; color: #a0aec0;" onclick="cambiarVista('vistaRegistro')">ABORTAR PROCEDIMIENTO</button>
+    <h2 style="color: #f59e0b;">Cuenta Existente</h2>
+    <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">Ya existe una cuenta. ¿Deseas solicitarle al administrador que te <b>reasigne una contraseña</b>?</p>
+    <div class="input-group"><label>NUEVO CORREO (Opcional)</label><input type="email" id="reasignarCorreo" placeholder="Llenar solo si cambió"></div>
+    <button class="btn-action btn-warning" onclick="enviarReasignacion()">SÍ, SOLICITAR CONTRASEÑA</button>
+    <button class="btn-action" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="cambiarVista('vistaRegistro')">CANCELAR</button>
   </div>
 
   <!-- Vista Principal (App) -->
   <div class="card" id="vistaApp" style="max-width: 480px;">
     <div id="badgeModulo" class="modulo-badge">OBRA</div>
-    <h2 class="glitch-title" data-text="MÓDULO DE REPORTE" style="font-size: 20px;">MÓDULO DE REPORTE</h2>
+    <h2>Módulo de Reporte</h2>
     
-    <div class="user-tech-panel">
-        <span id="infoUsuarioNombre" style="font-size: 14px; font-weight: 700; color: white; letter-spacing: 1px;">IDENTIDAD DESCONOCIDA</span><br>
-        <span id="infoUsuarioCedula" style="font-size: 11px; color: var(--secondary); font-family: 'JetBrains Mono';">CC: 000000000</span><br>
-        <span id="infoUsuarioCorreo" style="font-size: 11px; color: #64748b; font-family: 'JetBrains Mono';">correo@red.com</span>
+    <div style="background: rgba(0,242,96,0.1); padding: 12px; border-radius: 10px; margin-bottom: 20px; text-align: left; border-left: 3px solid var(--primary);">
+        <span id="infoUsuarioNombre" style="font-size: 15px; font-weight: 700; color: white;">NOMBRE</span><br>
+        <span id="infoUsuarioCedula" style="font-size: 12px; color: #a0aec0; font-family: 'JetBrains Mono';">CC: 000000000</span><br>
+        <span id="infoUsuarioCorreo" style="font-size: 12px; color: #a0aec0; font-family: 'JetBrains Mono';">correo@empresa.com</span>
     </div>
     
-    <div class="input-group"><label>PROYECTO DONDE SE REPORTA</label><select id="appProyecto" onchange="actualizarFrentes()"></select></div>
+    <div class="input-group"><label>PROYECTO ACTUAL</label><select id="appProyecto" onchange="actualizarFrentes()"></select></div>
     
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div class="input-group"><label>FRENTE</label><select id="appFrente"><option value="">SELECCIONE...</option></select></div>
-        <div class="input-group"><label>UBICACIÓN</label><input type="text" id="appUbicacion" placeholder="EJ. ZANJA NORTE"></div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="input-group"><label>FRENTE</label><select id="appFrente"><option value="">Seleccione...</option></select></div>
+        <div class="input-group"><label>UBICACIÓN</label><input type="text" id="appUbicacion" placeholder="Ej. Zanja Norte"></div>
     </div>
     
-    <div class="input-group" style="margin-top: 10px;"><label>DESCRIPCIÓN</label><textarea id="appDescripcion" rows="3" placeholder="Registrar detalles operativos..."></textarea></div>
+    <div class="input-group" style="margin-top: 18px;"><label>DESCRIPCIÓN / OBSERVACIONES</label><textarea id="appDescripcion" rows="3" placeholder="Detalles, novedades..."></textarea></div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
         <input type="file" id="inputFoto" accept="image/*" capture="environment">
         <button class="btn-action btn-foto" onclick="document.getElementById('inputFoto').click()" style="margin-top: 0;">📸 TOMAR FOTO</button>
         
         <input type="file" id="inputVideo" accept="video/*" capture="environment">
-        <button class="btn-action btn-video" onclick="document.getElementById('inputVideo').click()" style="margin-top: 0;">🎥 TOMAR VIDEO</button>
+        <button class="btn-action btn-video" onclick="document.getElementById('inputVideo').click()" style="margin-top: 0;">🎥 GRABAR VIDEO</button>
     </div>
     
     <input type="file" id="inputGaleria" accept="image/*,video/*" multiple>
-    <button class="btn-action btn-galeria" onclick="document.getElementById('inputGaleria').click()" style="margin-top: 0; margin-bottom: 12px;">📁 ADJUNTAR DESDE GALERÍA</button>
+    <button class="btn-action btn-galeria" onclick="document.getElementById('inputGaleria').click()" style="margin-top: 0; margin-bottom: 10px;">📁 ADJUNTAR DE GALERÍA</button>
 
-    <button id="btnGrabarAudio" class="btn-action" style="margin-top: 0; border-color: #f59e0b; color: #f59e0b;">🎤 INICIAR TRANSMISIÓN VOCAL</button>
+    <button id="btnGrabarAudio" class="btn-action" style="margin-top: 0;">🎤 GRABAR AUDIO</button>
     
-    <!-- Controles de Audio Holográficos -->
-    <div id="audioControls" style="display: none; align-items: center; justify-content: center; gap: 20px; margin-top: 20px; margin-bottom: 10px; background: rgba(245, 158, 11, 0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.2);">
-        <button id="btnPausarAudio" class="btn-action btn-warning" style="margin: 0; width: 45px; height: 45px; padding: 0; border-radius: 8px; font-size: 18px; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);">⏸️</button>
-        <div id="cronometro" style="display: block; margin: 0; font-size: 28px; font-family: 'JetBrains Mono', monospace; color: var(--accent); text-shadow: 0 0 15px rgba(255, 0, 85, 0.6); font-weight: 700;">00:00</div>
+    <!-- Controles de Audio -->
+    <div id="audioControls" style="display: none; align-items: center; justify-content: center; gap: 15px; margin-top: 15px; margin-bottom: 10px;">
+        <button id="btnPausarAudio" class="btn-action btn-warning" style="margin: 0; width: 50px; height: 50px; padding: 0; border-radius: 50%; font-size: 20px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);">⏸️</button>
+        <div id="cronometro" style="display: block; margin: 0; font-size: 32px; font-family: 'JetBrains Mono', monospace; color: #ff4b2b; text-shadow: 0 0 10px rgba(255, 75, 43, 0.5);">00:00</div>
     </div>
 
     <!-- Cola de archivos -->
     <div class="queue-container">
-        <label style="color:var(--secondary); margin-bottom: 15px;">ARCHIVOS EN ESPERA (<span id="queueCount" style="color: white;">0</span>)</label>
-        <div id="queueList" style="font-size: 11px; color: #64748b; font-style: normal;">VACÍO. SIN ARCHIVOS.</div>
-        <button id="btnEnviarReporte" class="btn-action" style="margin-top: 25px; display: none; background: rgba(0, 255, 102, 0.1);" onclick="enviarReporteEnCola()">🚀 CONFIRMAR Y ENVIAR</button>
+        <label style="color:white; margin-bottom: 10px;">ARCHIVOS EN ESPERA (<span id="queueCount">0</span>)</label>
+        <div id="queueList" style="font-size: 13px; color: #94a3b8; font-style: italic;">No hay archivos pendientes.</div>
+        <button id="btnEnviarReporte" class="btn-action" style="margin-top: 20px; display: none;" onclick="enviarReporteEnCola()">🚀 CONFIRMAR Y ENVIAR</button>
     </div>
 
-    <div style="margin-top: 30px; text-align: center;"><span class="link text-sm" style="color: #ff3366; margin-top:0; text-shadow: 0 0 5px rgba(255,51,102,0.4);" onclick="cerrarSesion()">CERRAR SESIÓN</span></div>
+    <div style="margin-top: 25px; text-align: center;"><span class="link text-sm" style="color: #ff6b6b; margin-top:0;" onclick="cerrarSesion()">Cerrar Sesión</span></div>
   </div>
 
-  <div class="footer">⚡ SISTEMA OPERATIVO GALIAS ⚡</div>
+  <div class="footer">Desarrollado por ⚡ Obras Manizales ⚡</div>
 
   <script>
     const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbw11I8G9sHoBpw9i-jShL1rCm2kAOq0EvkCU4vjL44KcZbc_0OzqEVMEtS_UAb3oezp/exec'; 
@@ -577,7 +526,7 @@
     let ultimaVista = 'vistaLogin'; 
     let cedulaParaReasignar = "";
     
-    // UI Helpers
+    // UI Helpers (Toast System para reemplazar ALERTS)
     let toastTimeout;
     function showToast(message) {
         const toast = document.getElementById('toastNotification');
@@ -624,6 +573,8 @@
     function getTelegramGroupUrl(proyectoNombre, modulo) {
         let nombre = String(proyectoNombre).toUpperCase();
         let esSST = (modulo === 'SST');
+        
+        // Regla para Personal Disperso
         if (nombre.includes("PERSONAL DISPERSO") || nombre.includes("TODAS LAS OBRAS")) return "https://web.telegram.org/k/";
         
         let infoProy = dbProyectos[nombre];
@@ -790,7 +741,7 @@
     function actualizarFrentes() {
         const proy = document.getElementById('appProyecto').value; 
         const fd = document.getElementById('appFrente'); 
-        fd.innerHTML = '<option value="">SELECCIONE...</option>';
+        fd.innerHTML = '<option value="">Seleccione...</option>';
         if(dbProyectos[proy] && dbProyectos[proy].frentes) { 
             dbProyectos[proy].frentes.forEach(f => { 
                 let opt = document.createElement('option'); opt.value = f; opt.text = f; fd.appendChild(opt); 
@@ -997,7 +948,7 @@
       } else {
         isRecording = false; 
         btnGrabarAudio.classList.remove('btn-audio-grabando'); 
-        btnGrabarAudio.innerHTML = "🎤 INICIAR TRANSMISIÓN VOCAL";
+        btnGrabarAudio.innerHTML = "🎤 GRABAR AUDIO";
         clearInterval(intervaloCronometro); 
         audioControls.style.display = 'none';
         
@@ -1030,7 +981,7 @@
         
         return new Blob(mp3Data, { type: 'audio/mp3' });
     }
-    
+
     // V26: NUEVA FUNCIÓN PARA OPTIMIZAR FOTOGRAFÍAS AL VUELO SIN PERDER TAMAÑO
     function optimizarImagen(file) {
         return new Promise((resolve) => {
@@ -1136,7 +1087,7 @@
         countSpan.innerText = archivosQueue.length;
         
         if(archivosQueue.length === 0) {
-            queueList.innerHTML = "VACÍO. SIN ARCHIVOS."; 
+            queueList.innerHTML = "No hay archivos pendientes."; 
             document.getElementById('btnEnviarReporte').style.display = 'none'; 
             return;
         }
@@ -1352,7 +1303,7 @@
         const btn = document.getElementById("btnErrorLoader"); 
         btn.className = "btn-action btn-error"; 
         btn.style.background = ""; 
-        btn.innerHTML = "ABORTAR CONEXIÓN"; 
+        btn.innerHTML = "Cerrar y Revisar"; 
     }
 
     function mostrarLoader(titulo) {
@@ -1386,7 +1337,7 @@
         document.getElementById("vistaLoader").classList.remove("is-processing"); 
         
         const t = document.getElementById("loaderTitle"); 
-        t.innerHTML = "¡ÉXITO! ✓"; 
+        t.innerHTML = "¡Éxito! ✓"; 
         t.style.color = "#00f260";
         
         document.getElementById("progressBar").style.background = "#00f260";
@@ -1407,11 +1358,11 @@
       document.getElementById("vistaLoader").classList.remove("is-processing"); 
       
       const t = document.getElementById("loaderTitle"); 
-      t.innerHTML = "FALLO DEL SISTEMA ⚠️"; 
+      t.innerHTML = "Fallo del Sistema ⚠️"; 
       t.style.color = "#ff6b6b";
       
       document.getElementById("progressBar").style.background = "#ff416c"; 
-      document.getElementById("progressBar").innerHTML = "ERROR";
+      document.getElementById("progressBar").innerHTML = "Error";
       
       const m = document.getElementById("message"); 
       clearInterval(m.scrambleInterval); 
@@ -1422,11 +1373,12 @@
       document.getElementById("btnErrorLoader").style.display = "flex";
     }
 
+    /* CORRECCIÓN: Ahora utilizamos ultimaVista para que no envíe forzosamente a vistaApp cuando falla el login */
     function volverDeError() { 
         document.getElementById("message").style.color = "#00f260"; 
         document.getElementById("loginPassword").value = ''; 
         resetBtnError(); 
-        cambiarVista('vistaApp'); 
+        cambiarVista(ultimaVista || 'vistaLogin'); 
     }
 
     function textScramble(e, t) {
@@ -1478,3 +1430,6 @@
   </script>
 </body>
 </html>
+```eof
+
+¡Todo listo! Esta versión ahora une lo mejor de tu diseño anterior con la robustez y optimización que necesitábamos para un envío rápido y sin duplicados o solapamientos. ¡Échale un vistazo!
