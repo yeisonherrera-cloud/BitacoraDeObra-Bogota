@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="app-version" content="1.0.4">
+  <meta name="app-version" content="1.0.5">
   <title>Plataforma de Registro y Captura</title>
   
   <!-- Fuentes: Inter para legibilidad, JetBrains Mono para toques Tech -->
@@ -277,7 +277,6 @@
         100% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0), inset 0 0 15px rgba(255, 0, 85, 0.5); } 
     }
 
-    /* Textos, Decodificación y Loader */
     .logo-wrapper { position: relative; display: inline-block; margin-bottom: 25px; }
     .logo-wrapper img { 
         width: 160px; 
@@ -287,6 +286,20 @@
         filter: drop-shadow(0 0 15px rgba(0, 204, 255, 0.3));
     }
     
+    /* EFECTO TEXTO LIMPIO PERO NEON (Reemplazo del Glitch molesto) */
+    .neon-title {
+        margin-top: 0; 
+        font-size: 24px; 
+        font-weight: 700; 
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 
+            0 0 5px rgba(255,255,255,0.5),
+            0 0 15px var(--primary),
+            0 0 30px var(--primary);
+    }
+
     .message { 
         margin: 15px 0; 
         min-height: 20px; 
@@ -397,10 +410,25 @@
         font-family: 'JetBrains Mono', monospace; backdrop-filter: blur(10px);
     }
     #toastNotification.show { bottom: 40px; }
+    
+    /* Info Usuario Panel Tech */
+    .user-tech-panel {
+        background: linear-gradient(135deg, rgba(0, 204, 255, 0.05), transparent);
+        padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: left; 
+        border-left: 3px solid var(--secondary);
+        border-top: 1px solid rgba(0, 204, 255, 0.1);
+        border-bottom: 1px solid rgba(0, 204, 255, 0.1);
+        position: relative; overflow: hidden;
+    }
+    .user-tech-panel::after {
+        content: ''; position: absolute; right: 10px; top: 10px; opacity: 0.1;
+        width: 40px; height: 40px;
+        background: radial-gradient(circle, var(--secondary) 0%, transparent 70%);
+        animation: pulseGlow 2s infinite alternate;
+    }
   </style>
 </head>
 <body>
-  
   <div id="updateBanner" onclick="window.location.reload(true)">🚀 Nueva versión disponible. Toca aquí para actualizar 🚀</div>
   
   <!-- Modal de Vista Previa -->
@@ -514,7 +542,7 @@
   <div class="footer">Desarrollado por ⚡ Obras Manizales ⚡</div>
 
   <script>
-    const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbw11I8G9sHoBpw9i-jShL1rCm2kAOq0EvkCU4vjL44KcZbc_0OzqEVMEtS_UAb3oezp/exec'; 
+    const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbygnehq_8PumEfLC7OiOym6eWuoU4EEDuRAc26hezKsifM0E1ufeooLg-IWt4BGKZCWaA/exec'; 
     
     let dbUsuarios = []; 
     let dbProyectos = {}; 
@@ -526,6 +554,9 @@
     let ultimaVista = 'vistaLogin'; 
     let cedulaParaReasignar = "";
     
+    // V27: NUEVA VARIABLE GLOBAL PARA MEMORIZAR EL HILO DE TELEGRAM
+    let hilosActivos = null; 
+
     // UI Helpers (Toast System para reemplazar ALERTS)
     let toastTimeout;
     function showToast(message) {
@@ -660,6 +691,8 @@
             descripcion: document.getElementById('appDescripcion').value 
         };
         localStorage.setItem('reporteDraft', JSON.stringify(draft));
+        // V27: Si el usuario cambia el proyecto, ubicación o texto, rompemos el hilo actual para que cree uno nuevo.
+        hilosActivos = null; 
     }
 
     function restaurarSesionYDraft() {
@@ -811,6 +844,7 @@
         localStorage.removeItem('reporteDraft');
         borrarArchivosDeIndexedDB(); 
         actualizarUICola();
+        hilosActivos = null; // V27: Resetear hilo de telegram
         
         ['appUbicacion','appDescripcion','loginPassword','appFrente'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('badgeModulo').style.display = 'none'; 
@@ -1172,8 +1206,6 @@
         const fecha = obtenerFechaFormateada(); 
         const modulo = usuarioActual.modulo || "OBRA";
 
-        mostrarLoader("Procesando Reporte...");
-        
         let archivosAEnviar = [...archivosQueue]; 
         let archivosRestantesEnCola = []; 
         let errores = 0; 
@@ -1186,32 +1218,37 @@
         
         let resumenText = `Se cargaron: ${contadoresTipo['Foto']} Fotos, ${contadoresTipo['Video']} Videos, ${contadoresTipo['Audio']} Audios.`;
 
-        // V26: Inicializar variable para guardar los hilos generados por Telegram
-        let hilosTelegram = {};
-
-        try {
-            const rTg = await fetch(URL_APPS_SCRIPT, { 
-                method: 'POST', 
-                body: JSON.stringify({ 
-                    action: 'telegram_header', 
-                    proyecto: proyectoElegido, 
-                    usuario: usuarioActual.nombre, 
-                    frente: frente, 
-                    ubicacion: ubicacion, 
-                    modulo: modulo, 
-                    descripcion: descripcion, 
-                    resumen: resumenText 
-                }) 
-            });
-            const resTg = await rTg.json();
-            if (resTg.estado === "error") {
-                return errorLoader(`Fallo en la subida.<br><span style="font-size:11px;color:#ffb3b3;margin-top:10px;display:block;">Detalle: ${resTg.mensaje}</span>`);
+        // V27: Solo enviamos un nuevo encabezado si no tenemos un hilo activo para esta sesión.
+        if (!hilosActivos) {
+            mostrarLoader("Generando Encabezado...");
+            try {
+                const rTg = await fetch(URL_APPS_SCRIPT, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ 
+                        action: 'telegram_header', 
+                        proyecto: proyectoElegido, 
+                        usuario: usuarioActual.nombre, 
+                        frente: frente, 
+                        ubicacion: ubicacion, 
+                        modulo: modulo, 
+                        descripcion: descripcion, 
+                        resumen: resumenText 
+                    }) 
+                });
+                const resTg = await rTg.json();
+                if (resTg.estado === "error") {
+                    return errorLoader(`Fallo al crear reporte en Telegram.<br><span style="font-size:11px;color:#ffb3b3;margin-top:10px;display:block;">Detalle: ${resTg.mensaje}</span>`);
+                }
+                if (resTg.threads) {
+                    hilosActivos = resTg.threads; // Memorizamos el ID del mensaje para este grupo
+                }
+            } catch(e) {
+                return errorLoader(`Fallo de conexión al servidor al crear el encabezado.`);
             }
-            // V26: Guardamos los threads devueltos por el backend
-            if (resTg.threads) {
-                hilosTelegram = resTg.threads;
-            }
-        } catch(e) {}
+        } else {
+            // Si hilosActivos existe, simplemente saltamos la creación y reutilizamos el hilo
+            mostrarLoader("Retomando Envío...");
+        }
 
         let contadoresSubida = { 'Foto': 0, 'Video': 0, 'Audio': 0 };
         
@@ -1233,7 +1270,7 @@
                             proyecto: proyectoElegido, 
                             modulo: modulo, 
                             frente: frente,
-                            threads: hilosTelegram // V26: Pasamos la referencia del hilo para agrupar los mensajes
+                            threads: hilosActivos // V27: Pasamos el hilo guardado en memoria global
                         }) 
                     });
                     const res = await r.json();
@@ -1286,6 +1323,9 @@
             localStorage.removeItem('reporteDraft'); 
             document.getElementById('appUbicacion').value = ''; 
             document.getElementById('appDescripcion').value = '';
+            
+            // V27: Al tener éxito total, reseteamos la memoria de los hilos para el siguiente reporte nuevo
+            hilosActivos = null;
             
             exitoLoader(`Reporte completado exitosamente.${btnTelegramHTML}`, 'vistaApp');
         } else {
@@ -1373,7 +1413,6 @@
       document.getElementById("btnErrorLoader").style.display = "flex";
     }
 
-    /* CORRECCIÓN: Ahora utilizamos ultimaVista para que no envíe forzosamente a vistaApp cuando falla el login */
     function volverDeError() { 
         document.getElementById("message").style.color = "#00f260"; 
         document.getElementById("loginPassword").value = ''; 
@@ -1402,7 +1441,7 @@
         } 
     }
 
-    let appVersionActual = "1.0.4";
+    let appVersionActual = "1.0.5";
     
     window.addEventListener("DOMContentLoaded", () => { 
         const metaTag = document.querySelector('meta[name="app-version"]'); 
@@ -1430,6 +1469,3 @@
   </script>
 </body>
 </html>
-```eof
-
-¡Todo listo! Esta versión ahora une lo mejor de tu diseño anterior con la robustez y optimización que necesitábamos para un envío rápido y sin duplicados o solapamientos. ¡Échale un vistazo!
