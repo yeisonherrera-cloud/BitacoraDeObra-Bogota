@@ -1043,7 +1043,7 @@
                         canvas.toBlob((blob) => {
                             let nuevoNombre = file.name.replace(/\.[^/.]+$/, "") + ".jpeg";
                             resolve(new File([blob], nuevoNombre, { type: 'image/jpeg' }));
-                        }, 'image/jpeg', 0.85); 
+                        }, 'image/jpeg', 0.99); 
                     }, 50); // Leve retraso para permitir actualizar la UI
                 };
             };
@@ -1223,7 +1223,7 @@
             if(contadoresTipo[item.tipo] !== undefined) contadoresTipo[item.tipo]++; 
         });
         
-        let resumenText = `Total: ${contadoresTipo['Foto']} Visual, ${contadoresTipo['Video']} Cinético, ${contadoresTipo['Audio']} Voz.`;
+        let resumenText = `Total: ${contadoresTipo['Foto']} Imágenes, ${contadoresTipo['Video']} Videos, ${contadoresTipo['Audio']} Audios.`;
 
         let hilosTelegram = {};
 
