@@ -1043,7 +1043,7 @@
                         canvas.toBlob((blob) => {
                             let nuevoNombre = file.name.replace(/\.[^/.]+$/, "") + ".jpeg";
                             resolve(new File([blob], nuevoNombre, { type: 'image/jpeg' }));
-                        }, 'image/jpeg', 0.99); 
+                        }, 'image/jpeg', 0.85); 
                     }, 50); // Leve retraso para permitir actualizar la UI
                 };
             };
