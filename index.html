@@ -548,7 +548,7 @@
   <div class="footer">⚡ DESARROLLO - OBRAS MANIZALES ⚡</div>
 
   <script>
-    const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbw11I8G9sHoBpw9i-jShL1rCm2kAOq0EvkCU4vjL44KcZbc_0OzqEVMEtS_UAb3oezp/exec'; 
+    const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbygnehq_8PumEfLC7OiOym6eWuoU4EEDuRAc26hezKsifM0E1ufeooLg-IWt4BGKZCWaA/exec'; 
     
     let dbUsuarios = []; 
     let dbProyectos = {}; 
@@ -562,6 +562,7 @@
     
     // NUEVA VARIABLE GLOBAL PARA MEMORIZAR EL HILO DE TELEGRAM
     let hilosActivos = null; 
+    let currentReportId = Date.now().toString(); // ID único de Reporte (Para evadir duplicados)
     
     // UI Helpers (Toast System para reemplazar ALERTS)
     let toastTimeout;
@@ -848,6 +849,7 @@
         borrarArchivosDeIndexedDB(); 
         actualizarUICola();
         hilosActivos = null; // Limpiar memoria de telegram al salir
+        currentReportId = Date.now().toString(); // Reset ID
         
         ['appUbicacion','appDescripcion','loginPassword','appFrente'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('appRetie').checked = false;
@@ -1241,7 +1243,8 @@
                         modulo: modulo, 
                         descripcion: descripcion, 
                         resumen: resumenText,
-                        isRetie: isRetie
+                        isRetie: isRetie,
+                        reportId: currentReportId // Adjuntamos el Ticket para proteger contra duplicados
                     }) 
                 });
                 const resTg = await rTg.json();
@@ -1346,6 +1349,7 @@
             document.getElementById('appRetie').checked = false;
             
             hilosActivos = null; // Reiniciamos la memoria de los hilos para el siguiente reporte
+            currentReportId = Date.now().toString(); // Refrescamos el ID para habilitar un nuevo reporte
             
             exitoLoader(`TRANSMISIÓN FINALIZADA.${btnTelegramHTML}`, 'vistaApp');
         } else {
@@ -1431,14 +1435,26 @@
       m.style.color = "white"; 
       m.innerHTML = `<b>${msgError}</b>`;
       
-      resetBtnError(); 
-      document.getElementById("btnErrorLoader").style.display = "flex";
+      // Mostrar botones de pop-up mejorados
+      document.getElementById("errorButtons").style.display = "grid";
+    }
+
+    function reintentarEnvio() {
+        document.getElementById("errorButtons").style.display = "none";
+        enviarReporteEnCola(); // Re-lanzar desde la ventana de carga!
     }
 
     function volverDeError() { 
         document.getElementById("message").style.color = "var(--primary)"; 
         document.getElementById("loginPassword").value = ''; 
-        resetBtnError(); 
+        document.getElementById("errorButtons").style.display = "none"; 
+        
+        // Si regresan al formulario, limpiamos la sesión para crear un "Nuevo Registro"
+        if (ultimaVista === 'vistaApp') {
+            hilosActivos = null; 
+            currentReportId = Date.now().toString(); 
+        }
+        
         cambiarVista(ultimaVista || 'vistaLogin'); 
     }
 
