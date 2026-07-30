@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="app-version" content="1.0.4">
+  <meta name="app-version" content="1.0.5">
   <title>Plataforma de Registro y Captura</title>
   
   <!-- Fuentes: Inter para legibilidad, JetBrains Mono para toques Tech -->
@@ -277,7 +277,6 @@
         100% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0), inset 0 0 15px rgba(255, 0, 85, 0.5); } 
     }
 
-    /* Textos, Decodificación y Loader */
     .logo-wrapper { position: relative; display: inline-block; margin-bottom: 25px; }
     .logo-wrapper img { 
         width: 160px; 
@@ -430,13 +429,12 @@
   </style>
 </head>
 <body>
-  
-  <div id="updateBanner" onclick="window.location.reload(true)">⚡ ACTUALIZACIÓN DE SISTEMA DETECTADA. REINICIAR ⚡</div>
+  <div id="updateBanner" onclick="window.location.reload(true)">🚀 Nueva versión disponible. Toca aquí para actualizar 🚀</div>
   
   <!-- Modal de Vista Previa -->
-  <div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2, 5, 7, 0.9); z-index:999999; justify-content:center; align-items:center; flex-direction:column; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
-      <button onclick="cerrarVistaPrevia()" style="position:absolute; top:25px; right:30px; background:rgba(255, 0, 85, 0.1); border:1px solid var(--accent); color:var(--accent); font-size:24px; cursor:pointer; width:45px; height:45px; border-radius:8px; display:flex; justify-content:center; align-items:center; box-shadow: 0 0 15px rgba(255, 0, 85, 0.3); z-index:1000000; transition: all 0.3s; font-family: 'JetBrains Mono', monospace;">X</button>
-      <div id="previewContent" style="max-width:90%; max-height:80%; display:flex; justify-content:center; align-items:center; border: 1px solid rgba(0, 204, 255, 0.3); padding: 5px; border-radius: 12px; box-shadow: 0 0 30px rgba(0, 204, 255, 0.1);"></div>
+  <div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; justify-content:center; align-items:center; flex-direction:column; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+      <button onclick="cerrarVistaPrevia()" style="position:absolute; top:20px; right:25px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; font-size:24px; cursor:pointer; width:40px; height:40px; border-radius:50%; display:flex; justify-content:center; align-items:center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index:1000000; transition: all 0.3s;">×</button>
+      <div id="previewContent" style="max-width:90%; max-height:80%; display:flex; justify-content:center; align-items:center;"></div>
   </div>
 
   <div id="toastNotification">Mensaje de prueba</div>
@@ -446,102 +444,102 @@
   <!-- Vista Loader -->
   <div class="card active" id="vistaLoader">
     <div class="logo-wrapper"><img src="https://lh3.googleusercontent.com/d/1TsBi-7jTXIUG4j9uNDBDu5gwxoTrHUq7" onerror="this.style.display='none'"></div>
-    <h2 id="loaderTitle" class="neon-title" data-text="INICIANDO SISTEMA">INICIANDO SISTEMA</h2>
-    <div class="message" id="message" data-current="">ESTABLECIENDO ENLACE...</div>
+    <h2 id="loaderTitle">Iniciando Sistema</h2>
+    <div class="message" id="message" data-current="">Conectando con base de datos...</div>
     <div class="progress-container"><div class="progress-bar" id="progressBar">0%</div></div>
-    <button id="btnErrorLoader" class="btn-action btn-error" style="display:none;" onclick="volverDeError()">REGRESAR</button>
-    <button id="btnExitoLoader" class="btn-action" style="display:none; border-color: var(--primary); box-shadow: 0 0 20px rgba(0,255,102,0.3);" onclick="volverDeExito()">CONTINUAR</button>
+    <button id="btnErrorLoader" class="btn-action btn-error" style="display:none;" onclick="volverDeError()">Cerrar y Revisar</button>
+    <button id="btnExitoLoader" class="btn-action" style="display:none; background: linear-gradient(135deg, #00f260, #0575e6);" onclick="volverDeExito()">Continuar</button>
   </div>
 
   <!-- Vista Login -->
   <div class="card" id="vistaLogin">
-    <h2 class="neon-title" data-text="BITÁCORA DE OBRA">BITÁCORA DE OBRA</h2>
-    <p style="color: #64748b; font-size: 11px; margin-bottom: 25px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px;">AUTENTICACIÓN REQUERIDA</p>
+    <h2>Sistema de Control</h2>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 25px;">Identificación de Personal Autorizado</p>
     <div class="input-group">
       <label>USUARIO</label>
-      <input type="text" list="listaNombres" id="loginNombre" placeholder="BUSCAR IDENTIDAD..." autocomplete="off">
+      <input type="text" list="listaNombres" id="loginNombre" placeholder="Buscar nombre..." autocomplete="off">
       <datalist id="listaNombres"></datalist>
     </div>
     <div class="input-group">
       <label>CONTRASEÑA</label>
       <input type="password" id="loginPassword" placeholder="••••••••">
     </div>
-    <button class="btn-action" onclick="iniciarSesion()">ACCEDER</button>
-    <span class="text-sm">¿ACCESO DENEGADO? <span class="link" onclick="cambiarVista('vistaRegistro')">REGISTRATE</span></span>
+    <button class="btn-action" onclick="iniciarSesion()">ACCEDER AL SISTEMA</button>
+    <span class="text-sm">¿No tienes cuenta? <span class="link" onclick="cambiarVista('vistaRegistro')">Solicitar Registro</span></span>
   </div>
 
   <!-- Vista Registro -->
   <div class="card" id="vistaRegistro">
-    <h2 class="neon-title" data-text="REGISTRO DE PERSONAL">REGISTRO DE PERSONAL</h2>
-    <p style="color: #64748b; font-size: 11px; margin-bottom: 20px; font-family: 'JetBrains Mono', monospace;">INGRESE DATOS</p>
-    <div class="input-group"><label>NOMBRE COMPLETO</label><input type="text" id="regNombre" placeholder="EJEMPLO: YEISON HERRERA BLANDON"></div>
-    <div class="input-group"><label>CÉDULA</label><input type="text" id="regCedula" placeholder="NÚMERO DE DOCUMENTO"></div>
+    <h2>Nuevo Personal</h2>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Ingrese sus datos para validación.</p>
+    <div class="input-group"><label>NOMBRE COMPLETO</label><input type="text" id="regNombre" placeholder="Nombres y Apellidos"></div>
+    <div class="input-group"><label>CÉDULA</label><input type="text" id="regCedula" placeholder="Número de documento"></div>
     <div class="input-group"><label>CORREO ELECTRÓNICO</label><input type="email" id="regCorreo" placeholder="ejemplo@galias.com.co"></div>
-    <div class="input-group"><label>CARGO ASIGNADO</label><input type="text" id="regCargo" placeholder="ROL OPERATIVO"></div>
+    <div class="input-group"><label>CARGO</label><input type="text" id="regCargo" placeholder="Ej. Maestro de Obra"></div>
     <div class="input-group"><label>PROYECTO ASIGNADO</label><select id="regProyecto"></select></div>
     <button class="btn-action" onclick="registrarUsuario()">ENVIAR SOLICITUD</button>
-    <button class="btn-action" style="border-color: rgba(255,255,255,0.2); box-shadow: none; color: #a0aec0;" onclick="cambiarVista('vistaLogin')">REGRESAR</button>
+    <button class="btn-action" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="cambiarVista('vistaLogin')">Volver al Inicio</button>
   </div>
 
   <!-- Vista Reasignar Contraseña -->
   <div class="card" id="vistaReasignar">
-    <h2 class="neon-title" data-text="CUENTA EXISTENTE" style="color: var(--secondary);">CUENTA EXISTENTE</h2>
-    <p style="color: #94a3b8; font-size: 12px; margin-bottom: 20px; line-height: 1.6; font-family: 'JetBrains Mono', monospace;">Identidad ya registrada en la base de datos central. ¿Requiere un reseteo de código de acceso?</p>
-    <div class="input-group"><label>ACTUALIZAR ENLACE (NUEVO CORREO)</label><input type="email" id="reasignarCorreo" placeholder="Opcional. Llenar si cambió"></div>
-    <button class="btn-action btn-warning" onclick="enviarReasignacion()">CONFIRMAR RESETEO</button>
-    <button class="btn-action" style="border-color: rgba(255,255,255,0.2); box-shadow: none; color: #a0aec0;" onclick="cambiarVista('vistaRegistro')">ABORTAR PROCEDIMIENTO</button>
+    <h2 style="color: #f59e0b;">Cuenta Existente</h2>
+    <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">Ya existe una cuenta. ¿Deseas solicitarle al administrador que te <b>reasigne una contraseña</b>?</p>
+    <div class="input-group"><label>NUEVO CORREO (Opcional)</label><input type="email" id="reasignarCorreo" placeholder="Llenar solo si cambió"></div>
+    <button class="btn-action btn-warning" onclick="enviarReasignacion()">SÍ, SOLICITAR CONTRASEÑA</button>
+    <button class="btn-action" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none;" onclick="cambiarVista('vistaRegistro')">CANCELAR</button>
   </div>
 
   <!-- Vista Principal (App) -->
   <div class="card" id="vistaApp" style="max-width: 480px;">
     <div id="badgeModulo" class="modulo-badge">OBRA</div>
-    <h2 class="neon-title" data-text="MÓDULO DE REPORTE" style="font-size: 20px;">MÓDULO DE REPORTE</h2>
+    <h2>Módulo de Reporte</h2>
     
-    <div class="user-tech-panel">
-        <span id="infoUsuarioNombre" style="font-size: 14px; font-weight: 700; color: white; letter-spacing: 1px;">IDENTIDAD DESCONOCIDA</span><br>
-        <span id="infoUsuarioCedula" style="font-size: 11px; color: var(--secondary); font-family: 'JetBrains Mono';">CC: 000000000</span><br>
-        <span id="infoUsuarioCorreo" style="font-size: 11px; color: #64748b; font-family: 'JetBrains Mono';">correo@red.com</span>
+    <div style="background: rgba(0,242,96,0.1); padding: 12px; border-radius: 10px; margin-bottom: 20px; text-align: left; border-left: 3px solid var(--primary);">
+        <span id="infoUsuarioNombre" style="font-size: 15px; font-weight: 700; color: white;">NOMBRE</span><br>
+        <span id="infoUsuarioCedula" style="font-size: 12px; color: #a0aec0; font-family: 'JetBrains Mono';">CC: 000000000</span><br>
+        <span id="infoUsuarioCorreo" style="font-size: 12px; color: #a0aec0; font-family: 'JetBrains Mono';">correo@empresa.com</span>
     </div>
     
-    <div class="input-group"><label>PROYECTO DONDE SE REPORTA</label><select id="appProyecto" onchange="actualizarFrentes()"></select></div>
+    <div class="input-group"><label>PROYECTO ACTUAL</label><select id="appProyecto" onchange="actualizarFrentes()"></select></div>
     
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div class="input-group"><label>FRENTE</label><select id="appFrente"><option value="">SELECCIONE...</option></select></div>
-        <div class="input-group"><label>UBICACIÓN</label><input type="text" id="appUbicacion" placeholder="EJ. ZANJA NORTE"></div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="input-group"><label>FRENTE</label><select id="appFrente"><option value="">Seleccione...</option></select></div>
+        <div class="input-group"><label>UBICACIÓN</label><input type="text" id="appUbicacion" placeholder="Ej. Zanja Norte"></div>
     </div>
     
-    <div class="input-group" style="margin-top: 10px;"><label>DESCRIPCIÓN</label><textarea id="appDescripcion" rows="3" placeholder="Registrar detalles operativos..."></textarea></div>
+    <div class="input-group" style="margin-top: 18px;"><label>DESCRIPCIÓN / OBSERVACIONES</label><textarea id="appDescripcion" rows="3" placeholder="Detalles, novedades..."></textarea></div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
         <input type="file" id="inputFoto" accept="image/*" capture="environment">
         <button class="btn-action btn-foto" onclick="document.getElementById('inputFoto').click()" style="margin-top: 0;">📸 TOMAR FOTO</button>
         
         <input type="file" id="inputVideo" accept="video/*" capture="environment">
-        <button class="btn-action btn-video" onclick="document.getElementById('inputVideo').click()" style="margin-top: 0;">🎥 TOMAR VIDEO</button>
+        <button class="btn-action btn-video" onclick="document.getElementById('inputVideo').click()" style="margin-top: 0;">🎥 GRABAR VIDEO</button>
     </div>
     
     <input type="file" id="inputGaleria" accept="image/*,video/*" multiple>
-    <button class="btn-action btn-galeria" onclick="document.getElementById('inputGaleria').click()" style="margin-top: 0; margin-bottom: 12px;">📁 ADJUNTAR DESDE GALERÍA</button>
+    <button class="btn-action btn-galeria" onclick="document.getElementById('inputGaleria').click()" style="margin-top: 0; margin-bottom: 10px;">📁 ADJUNTAR DE GALERÍA</button>
 
-    <button id="btnGrabarAudio" class="btn-action" style="margin-top: 0; border-color: #f59e0b; color: #f59e0b;">🎤 GRABAR AUDIO</button>
+    <button id="btnGrabarAudio" class="btn-action" style="margin-top: 0;">🎤 GRABAR AUDIO</button>
     
-    <!-- Controles de Audio Holográficos -->
-    <div id="audioControls" style="display: none; align-items: center; justify-content: center; gap: 20px; margin-top: 20px; margin-bottom: 10px; background: rgba(245, 158, 11, 0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.2);">
-        <button id="btnPausarAudio" class="btn-action btn-warning" style="margin: 0; width: 45px; height: 45px; padding: 0; border-radius: 8px; font-size: 18px; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);">⏸️</button>
-        <div id="cronometro" style="display: block; margin: 0; font-size: 28px; font-family: 'JetBrains Mono', monospace; color: var(--accent); text-shadow: 0 0 15px rgba(255, 0, 85, 0.6); font-weight: 700;">00:00</div>
+    <!-- Controles de Audio -->
+    <div id="audioControls" style="display: none; align-items: center; justify-content: center; gap: 15px; margin-top: 15px; margin-bottom: 10px;">
+        <button id="btnPausarAudio" class="btn-action btn-warning" style="margin: 0; width: 50px; height: 50px; padding: 0; border-radius: 50%; font-size: 20px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);">⏸️</button>
+        <div id="cronometro" style="display: block; margin: 0; font-size: 32px; font-family: 'JetBrains Mono', monospace; color: #ff4b2b; text-shadow: 0 0 10px rgba(255, 75, 43, 0.5);">00:00</div>
     </div>
 
     <!-- Cola de archivos -->
     <div class="queue-container">
-        <label style="color:var(--secondary); margin-bottom: 15px;">ARCHIVOS EN ESPERA (<span id="queueCount" style="color: white;">0</span>)</label>
-        <div id="queueList" style="font-size: 11px; color: #64748b; font-style: normal;">VACÍO. SIN ARCHIVOS.</div>
-        <button id="btnEnviarReporte" class="btn-action" style="margin-top: 25px; display: none; background: rgba(0, 255, 102, 0.1);" onclick="enviarReporteEnCola()">🚀 CONFIRMAR Y ENVIAR</button>
+        <label style="color:white; margin-bottom: 10px;">ARCHIVOS EN ESPERA (<span id="queueCount">0</span>)</label>
+        <div id="queueList" style="font-size: 13px; color: #94a3b8; font-style: italic;">No hay archivos pendientes.</div>
+        <button id="btnEnviarReporte" class="btn-action" style="margin-top: 20px; display: none;" onclick="enviarReporteEnCola()">🚀 CONFIRMAR Y ENVIAR</button>
     </div>
 
-    <div style="margin-top: 30px; text-align: center;"><span class="link text-sm" style="color: #ff3366; margin-top:0; text-shadow: 0 0 5px rgba(255,51,102,0.4);" onclick="cerrarSesion()">CERRAR SESIÓN</span></div>
+    <div style="margin-top: 25px; text-align: center;"><span class="link text-sm" style="color: #ff6b6b; margin-top:0;" onclick="cerrarSesion()">Cerrar Sesión</span></div>
   </div>
 
-  <div class="footer">⚡ DESARROLLO - OBRAS MANIZALES ⚡</div>
+  <div class="footer">Desarrollado por ⚡ Obras Manizales ⚡</div>
 
   <script>
     const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbw11I8G9sHoBpw9i-jShL1rCm2kAOq0EvkCU4vjL44KcZbc_0OzqEVMEtS_UAb3oezp/exec'; 
@@ -556,6 +554,9 @@
     let ultimaVista = 'vistaLogin'; 
     let cedulaParaReasignar = "";
     
+    // V27: NUEVA VARIABLE GLOBAL PARA MEMORIZAR EL HILO DE TELEGRAM
+    let hilosActivos = null; 
+
     // UI Helpers (Toast System para reemplazar ALERTS)
     let toastTimeout;
     function showToast(message) {
@@ -632,7 +633,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
-        mostrarLoader("INICIANDO SISTEMA");
+        mostrarLoader("Iniciando Sistema");
         await initDB(); 
         try {
             const response = await fetch(URL_APPS_SCRIPT, { method: 'POST', body: JSON.stringify({ action: 'init' }) });
@@ -668,10 +669,10 @@
                     cambiarVista('vistaLogin'); 
                 }
             } else { 
-                errorLoader("Fallo al leer datos centrales."); 
+                errorLoader("No se pudo cargar la base de datos."); 
             }
         } catch (e) { 
-            errorLoader("Sin conexión al servidor."); 
+            errorLoader("Fallo de conexión al servidor."); 
         }
 
         document.querySelectorAll('#vistaApp input, #vistaApp select, #vistaApp textarea').forEach(el => {
@@ -690,6 +691,8 @@
             descripcion: document.getElementById('appDescripcion').value 
         };
         localStorage.setItem('reporteDraft', JSON.stringify(draft));
+        // V27: Si el usuario cambia el proyecto, ubicación o texto, rompemos el hilo actual para que cree uno nuevo.
+        hilosActivos = null; 
     }
 
     function restaurarSesionYDraft() {
@@ -708,10 +711,9 @@
         if (usuarioActual.modulo === 'SST') { 
             badge.innerText = '🛡️ SST'; 
             badge.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)'; 
-            badge.style.color = "white";
         } else { 
             badge.innerText = '🏗️ OBRA'; 
-            badge.style.background = 'linear-gradient(135deg, #00f260, #00ccff)'; 
+            badge.style.background = 'linear-gradient(135deg, #0575e6, #021b79)'; 
         }
 
         const draftStr = localStorage.getItem('reporteDraft');
@@ -750,7 +752,7 @@
       
       if(!nombre || !password) return showToast("Por favor ingresa Usuario y Contraseña.");
       
-      mostrarLoader("VALIDANDO INFORMACIÓN");
+      mostrarLoader("Autenticando Usuario");
       try {
         const r = await fetch(URL_APPS_SCRIPT, { method: 'POST', body: JSON.stringify({ action: 'login', nombre: nombre, password: password }) });
         const res = await r.json();
@@ -760,19 +762,19 @@
           localStorage.setItem('usuarioActual', JSON.stringify(res)); 
           document.getElementById('loginPassword').value = ''; 
           restaurarSesionYDraft(); 
-          exitoLoader(`ACCESO CONCEDIDO:<br><b style="color:white;">${res.nombre}</b>`, 'vistaApp');
+          exitoLoader(`Bienvenido al sistema,<br><b style="color:white;">${res.nombre}</b>`, 'vistaApp');
         } else {
             errorLoader(res.mensaje);
         }
       } catch (e) { 
-          errorLoader("Falla en el enlace al servidor central."); 
+          errorLoader("Error de conexión al servidor central."); 
       }
     }
 
     function actualizarFrentes() {
         const proy = document.getElementById('appProyecto').value; 
         const fd = document.getElementById('appFrente'); 
-        fd.innerHTML = '<option value="">SELECCIONE...</option>';
+        fd.innerHTML = '<option value="">Seleccione...</option>';
         if(dbProyectos[proy] && dbProyectos[proy].frentes) { 
             dbProyectos[proy].frentes.forEach(f => { 
                 let opt = document.createElement('option'); opt.value = f; opt.text = f; fd.appendChild(opt); 
@@ -791,17 +793,17 @@
         const cargo = document.getElementById('regCargo').value.trim().toUpperCase();
         const proyecto = document.getElementById('regProyecto').value;
         
-        if(!cedula || !nombre) return showToast("Cédula e Identidad requeridas.");
-        if (!validarCorreoRegex(correo)) return showToast("Correo Electronico inválido.");
+        if(!cedula || !nombre) return showToast("Cédula y Nombre son obligatorios.");
+        if (!validarCorreoRegex(correo)) return showToast("Ingrese un correo electrónico válido.");
 
-        mostrarLoader("TRANSMITIENDO INFORMACIÓN...");
+        mostrarLoader("Verificando Datos");
         try {
             const r = await fetch(URL_APPS_SCRIPT, { method: 'POST', body: JSON.stringify({ action: 'register', cedula, nombre, correo, cargo, proyecto }) });
             const res = await r.json();
             
             if(res.estado === 'exito') {
                 ['regCedula','regNombre','regCorreo','regCargo'].forEach(id => document.getElementById(id).value = '');
-                exitoLoader(`DATOS RECIBIDOS POR EL ADMINISTRADOR.`, 'vistaLogin');
+                exitoLoader(`Solicitud enviada a Administración.`, 'vistaLogin');
             } else if (res.estado === 'duplicado') {
                 cedulaParaReasignar = cedula; 
                 clearInterval(simuladorEnMarcha); 
@@ -811,15 +813,15 @@
                 errorLoader(res.mensaje); 
             }
         } catch (e) { 
-            errorLoader("Falla en la transmisión."); 
+            errorLoader("Error de conexión."); 
         }
     }
 
     async function enviarReasignacion() {
         const nuevoCorreo = document.getElementById('reasignarCorreo').value.trim().toUpperCase();
-        if (nuevoCorreo !== "" && !validarCorreoRegex(nuevoCorreo)) return showToast("Correo Electrónico inválido.");
+        if (nuevoCorreo !== "" && !validarCorreoRegex(nuevoCorreo)) return showToast("Ingrese un correo válido.");
 
-        mostrarLoader("ENVIANDO ALERTA...");
+        mostrarLoader("Enviando Solicitud");
         try {
             const r = await fetch(URL_APPS_SCRIPT, { method: 'POST', body: JSON.stringify({ action: 'reasignar', cedula: cedulaParaReasignar, nuevoCorreo: nuevoCorreo }) });
             const res = await r.json();
@@ -827,12 +829,12 @@
                 document.getElementById('reasignarCorreo').value = ''; 
                 cedulaParaReasignar = "";
                 ['regCedula','regNombre','regCorreo','regCargo'].forEach(id => document.getElementById(id).value = '');
-                exitoLoader(`EL ADMINISTRADOR HA SIDO ALERTADO.`, 'vistaLogin');
+                exitoLoader(`El Administrador ha sido notificado.`, 'vistaLogin');
             } else { 
                 errorLoader(res.mensaje); 
             }
         } catch (e) { 
-            errorLoader("Falla en la transmisión."); 
+            errorLoader("Error de conexión."); 
         }
     }
 
@@ -842,6 +844,7 @@
         localStorage.removeItem('reporteDraft');
         borrarArchivosDeIndexedDB(); 
         actualizarUICola();
+        hilosActivos = null; // V27: Resetear hilo de telegram
         
         ['appUbicacion','appDescripcion','loginPassword','appFrente'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('badgeModulo').style.display = 'none'; 
@@ -897,7 +900,7 @@
           };
           
           mediaRecorder.onstop = async () => {
-              mostrarLoader("COMPRIMIENDO AUDIO...");
+              mostrarLoader("Convirtiendo a MP3...");
               setTimeout(async () => {
                   let mimeOriginal = mediaRecorder.mimeType || 'audio/webm';
                   let extOriginal = 'webm';
@@ -907,8 +910,8 @@
                   const audioBlobOriginal = new Blob(audioChunks, { type: mimeOriginal });
 
                   try {
-                      if (audioChunks.length === 0) throw new Error("Audio vacío.");
-                      if (typeof lamejs === 'undefined') throw new Error("Codificador inactivo.");
+                      if (audioChunks.length === 0) throw new Error("No se capturó audio.");
+                      if (typeof lamejs === 'undefined') throw new Error("La librería MP3 no cargó.");
                       
                       const arrayBuffer = await audioBlobOriginal.arrayBuffer();
                       const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
@@ -939,7 +942,7 @@
                               mp3Blob = encodeToMP3FromBuffer(pcmData, TARGET_SAMPLE_RATE);
                               if (mp3Blob.size < 5000) { 
                                   mp3Blob = null; 
-                                  throw new Error("Archivo corrupto."); 
+                                  throw new Error("MP3 corrupto."); 
                               }
                           } catch (encErr) { 
                               if (intentos >= MAX_INTENTOS) throw new Error("Fallo de compresión."); 
@@ -948,9 +951,9 @@
                       }
                       
                       if (mp3Blob) agregarACola(mp3Blob, 'Audio', 'mp3'); 
-                      else throw new Error("Fallo final.");
+                      else throw new Error("Fallo final MP3.");
                   } catch(err) {
-                      console.warn("Fallback de audio:", err); 
+                      console.warn("Fallback MP3 activado:", err); 
                       agregarACola(audioBlobOriginal, 'Audio', extOriginal);
                   } finally { 
                       document.getElementById("vistaLoader").classList.remove("is-processing"); 
@@ -964,7 +967,7 @@
           isPaused = false;
           
           btnGrabarAudio.classList.add('btn-audio-grabando'); 
-          btnGrabarAudio.innerHTML = "⏹️ CORTAR TRANSMISIÓN";
+          btnGrabarAudio.innerHTML = "⏹️ DETENER AUDIO";
           audioControls.style.display = 'flex'; 
           btnPausarAudio.innerHTML = "⏸️"; 
           btnPausarAudio.style.background = "";
@@ -974,12 +977,12 @@
           intervaloCronometro = setInterval(actualizarCronometro, 1000);
           
         } catch (error) { 
-            showToast("Acceso al micrófono denegado."); 
+            showToast("Permiso de micrófono denegado."); 
         }
       } else {
         isRecording = false; 
         btnGrabarAudio.classList.remove('btn-audio-grabando'); 
-        btnGrabarAudio.innerHTML = "🎤 INICIAR TRANSMISIÓN VOCAL";
+        btnGrabarAudio.innerHTML = "🎤 GRABAR AUDIO";
         clearInterval(intervaloCronometro); 
         audioControls.style.display = 'none';
         
@@ -1013,40 +1016,86 @@
         return new Blob(mp3Data, { type: 'audio/mp3' });
     }
 
-    document.getElementById('inputFoto').addEventListener('change', e => procesarArchivoLocal(e, 'Foto'));
-    document.getElementById('inputVideo').addEventListener('change', e => procesarArchivoLocal(e, 'Video'));
+    // V26: NUEVA FUNCIÓN PARA OPTIMIZAR FOTOGRAFÍAS AL VUELO SIN PERDER TAMAÑO
+    function optimizarImagen(file) {
+        return new Promise((resolve) => {
+            if (!file.type.startsWith('image/')) return resolve(file);
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    setTimeout(() => {
+                        const canvas = document.createElement('canvas');
+                        // Mantenemos la resolución (ancho y alto) intacta
+                        canvas.width = img.width; 
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        
+                        // Convertimos a JPEG al 85% de calidad (Excelente equilibrio visual/peso)
+                        canvas.toBlob((blob) => {
+                            let nuevoNombre = file.name.replace(/\.[^/.]+$/, "") + ".jpeg";
+                            resolve(new File([blob], nuevoNombre, { type: 'image/jpeg' }));
+                        }, 'image/jpeg', 0.85); 
+                    }, 50); // Leve retraso para permitir actualizar la UI
+                };
+            };
+        });
+    }
+
+    document.getElementById('inputFoto').addEventListener('change', async e => procesarArchivoLocal(e, 'Foto'));
+    document.getElementById('inputVideo').addEventListener('change', async e => procesarArchivoLocal(e, 'Video'));
     
-    document.getElementById('inputGaleria').addEventListener('change', e => {
+    document.getElementById('inputGaleria').addEventListener('change', async e => {
         const files = e.target.files; 
         if (!files || files.length === 0) return;
         
+        mostrarLoader("Optimizando Datos...");
         for (let i = 0; i < files.length; i++) {
             const archivo = files[i];
             if (archivo.size > 40 * 1024 * 1024) { 
-                showToast(`El archivo ${archivo.name} excede el límite (40MB).`); 
+                showToast(`El archivo ${archivo.name} pesa mucho (Máx 40MB).`); 
                 continue; 
             }
             let tipo = archivo.type.includes('video') ? 'Video' : 'Foto';
             let extension = archivo.name.split('.').pop().toLowerCase();
-            if (tipo === 'Video' && (!extension || extension === '')) extension = 'mp4'; 
             
-            agregarACola(archivo, tipo, extension);
+            if (tipo === 'Foto') {
+                const optimizado = await optimizarImagen(archivo);
+                agregarACola(optimizado, tipo, 'jpeg');
+            } else {
+                if (!extension || extension === '') extension = 'mp4'; 
+                agregarACola(archivo, tipo, extension);
+            }
         }
+        document.getElementById("vistaLoader").classList.remove("is-processing"); 
+        cambiarVista('vistaApp');
         e.target.value = ""; 
     });
 
-    function procesarArchivoLocal(e, tipo) {
+    async function procesarArchivoLocal(e, tipo) {
       const archivo = e.target.files[0]; 
       if (!archivo) return;
       if (archivo.size > 40 * 1024 * 1024) { 
-          showToast(`Límite de archivo excedido (40MB).`); 
+          showToast(`Archivo muy pesado (Máx 40MB).`); 
           e.target.value = ""; 
           return; 
       }
-      let extension = archivo.name.split('.').pop().toLowerCase(); 
-      if(tipo === 'Video') extension = 'mp4'; 
       
-      agregarACola(archivo, tipo, extension); 
+      if (tipo === 'Foto') {
+          mostrarLoader("Optimizando Captura...");
+          const optimizado = await optimizarImagen(archivo);
+          agregarACola(optimizado, tipo, 'jpeg');
+          document.getElementById("vistaLoader").classList.remove("is-processing"); 
+          cambiarVista('vistaApp');
+      } else {
+          let extension = archivo.name.split('.').pop().toLowerCase(); 
+          if(tipo === 'Video') extension = 'mp4'; 
+          agregarACola(archivo, tipo, extension); 
+      }
       e.target.value = "";
     }
 
@@ -1072,7 +1121,7 @@
         countSpan.innerText = archivosQueue.length;
         
         if(archivosQueue.length === 0) {
-            queueList.innerHTML = "VACÍO. SIN ARCHIVOS."; 
+            queueList.innerHTML = "No hay archivos pendientes."; 
             document.getElementById('btnEnviarReporte').style.display = 'none'; 
             return;
         }
@@ -1087,7 +1136,7 @@
             div.className = baseClass;
             
             let icon = item.tipo === 'Foto' ? '📸' : (item.tipo === 'Video' ? '🎥' : '🎤');
-            let failBadge = item.hasFailed ? '<br><span style="color:#ff0055; font-size:10px; margin-top:4px; display:inline-block; background:rgba(255,0,85,0.2); padding:2px 6px; border-radius:4px;">⚠️ FALLÓ EL ENLACE</span>' : '';
+            let failBadge = item.hasFailed ? '<br><span style="color:#ff8787; font-size:10px; margin-top:4px; display:inline-block; background:rgba(255,75,43,0.2); padding:2px 6px; border-radius:4px;">⚠️ Falló, reintente</span>' : '';
 
             div.innerHTML = `
                 <div style="text-align: left; display: flex; align-items: center; gap: 10px;">
@@ -1098,8 +1147,8 @@
                     </div>
                 </div> 
                 <div style="display: flex; gap: 15px; align-items: center;">
-                    <button class="btn-preview" onclick="abrirVistaPrevia(${index})" style="background:none; border:none; color:var(--secondary); cursor:pointer; font-size:20px; padding:0; text-shadow: 0 0 5px rgba(0, 204, 255, 0.5);" title="Inspeccionar">👁️</button>
-                    <button class="btn-remove" onclick="removerDeCola(${index})" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:24px; font-weight:bold; padding:0; line-height: 1; text-shadow: 0 0 5px rgba(255, 0, 85, 0.5);" title="Eliminar">×</button>
+                    <button class="btn-preview" onclick="abrirVistaPrevia(${index})" style="background:none; border:none; color:#38bdf8; cursor:pointer; font-size:20px; padding:0;" title="Ver">👁️</button>
+                    <button class="btn-remove" onclick="removerDeCola(${index})" style="background:none; border:none; color:#ff4b2b; cursor:pointer; font-size:24px; font-weight:bold; padding:0; line-height: 1;" title="Eliminar">×</button>
                 </div>
             `;
             queueList.appendChild(div);
@@ -1112,16 +1161,16 @@
         content.innerHTML = ''; 
         
         if (item.tipo === 'Foto') { 
-            content.innerHTML = `<img src="${item.base64}" style="max-width:100%; max-height:80vh; border-radius:12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(0, 204, 255, 0.3);">`; 
+            content.innerHTML = `<img src="${item.base64}" style="max-width:100%; max-height:80vh; border-radius:12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);">`; 
         } 
         else if (item.tipo === 'Video') { 
-            content.innerHTML = `<video src="${item.base64}" controls autoplay style="max-width:100%; max-height:80vh; border-radius:12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(0, 204, 255, 0.3);"></video>`; 
+            content.innerHTML = `<video src="${item.base64}" controls autoplay style="max-width:100%; max-height:80vh; border-radius:12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);"></video>`; 
         } 
         else if (item.tipo === 'Audio') {
             content.innerHTML = `
-            <div style="background:var(--card-bg); padding:30px 20px; border-radius:15px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(0, 204, 255, 0.3); width: 300px; backdrop-filter: blur(15px);">
-                <div style="font-size: 40px; margin-bottom: 15px; text-shadow: 0 0 15px rgba(0, 204, 255, 0.8);">🎧</div>
-                <h3 style="margin-top:0; color:white; font-size: 16px; margin-bottom: 20px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;">Grabación ${index + 1}</h3>
+            <div style="background:var(--card-bg); padding:30px 20px; border-radius:15px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1); width: 300px;">
+                <div style="font-size: 40px; margin-bottom: 15px;">🎧</div>
+                <h3 style="margin-top:0; color:white; font-size: 16px; margin-bottom: 20px;">Nota de Voz ${index + 1}</h3>
                 <audio src="${item.base64}" controls autoplay style="width: 100%; border-radius: 25px;"></audio>
             </div>`;
         }
@@ -1140,25 +1189,23 @@
     }
 
     async function enviarReporteEnCola() {
-        if (isRecording) return showToast("Cortar transmisión de voz antes de enviar.");
+        if (isRecording) return showToast("Hay un audio grabándose. Detenlo antes de enviar.");
         
         const proyectoElegido = document.getElementById('appProyecto').value;
         const frente = document.getElementById('appFrente').value.trim().toUpperCase();
         const ubicacion = document.getElementById('appUbicacion').value.trim().toUpperCase();
         const descripcion = document.getElementById('appDescripcion').value.trim();
         
-        if(!proyectoElegido) return showToast("Definir PROYECTO OBJETIVO.");
-        if(!frente) return showToast("Definir FRENTE.");
-        if(!ubicacion) return showToast("Definir UBICACIÓN.");
-        if(archivosQueue.length === 0) return showToast("No hay archivos para enviar.");
+        if(!proyectoElegido) return showToast("Seleccione un PROYECTO.");
+        if(!frente) return showToast("Seleccione un FRENTE.");
+        if(!ubicacion) return showToast("Ingrese una UBICACIÓN.");
+        if(archivosQueue.length === 0) return showToast("Agregue al menos un archivo.");
 
         const infoProy = dbProyectos[proyectoElegido]; 
         const sigla = infoProy ? infoProy.sigla : "S-S";
         const fecha = obtenerFechaFormateada(); 
         const modulo = usuarioActual.modulo || "OBRA";
 
-        mostrarLoader("ENLAZANDO CON CARPETAS...");
-        
         let archivosAEnviar = [...archivosQueue]; 
         let archivosRestantesEnCola = []; 
         let errores = 0; 
@@ -1169,34 +1216,46 @@
             if(contadoresTipo[item.tipo] !== undefined) contadoresTipo[item.tipo]++; 
         });
         
-        let resumenText = `Total: ${contadoresTipo['Foto']} Visual, ${contadoresTipo['Video']} Cinético, ${contadoresTipo['Audio']} Voz.`;
+        let resumenText = `Se cargaron: ${contadoresTipo['Foto']} Fotos, ${contadoresTipo['Video']} Videos, ${contadoresTipo['Audio']} Audios.`;
 
-        try {
-            const rTg = await fetch(URL_APPS_SCRIPT, { 
-                method: 'POST', 
-                body: JSON.stringify({ 
-                    action: 'telegram_header', 
-                    proyecto: proyectoElegido, 
-                    usuario: usuarioActual.nombre, 
-                    frente: frente, 
-                    ubicacion: ubicacion, 
-                    modulo: modulo, 
-                    descripcion: descripcion, 
-                    resumen: resumenText 
-                }) 
-            });
-            const resTg = await rTg.json();
-            if (resTg.estado === "error") {
-                return errorLoader(`Falla de conexión.<br><span style="font-size:10px;color:var(--accent);margin-top:10px;display:block;">${resTg.mensaje}</span>`);
+        // V27: Solo enviamos un nuevo encabezado si no tenemos un hilo activo para esta sesión.
+        if (!hilosActivos) {
+            mostrarLoader("Generando Encabezado...");
+            try {
+                const rTg = await fetch(URL_APPS_SCRIPT, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ 
+                        action: 'telegram_header', 
+                        proyecto: proyectoElegido, 
+                        usuario: usuarioActual.nombre, 
+                        frente: frente, 
+                        ubicacion: ubicacion, 
+                        modulo: modulo, 
+                        descripcion: descripcion, 
+                        resumen: resumenText 
+                    }) 
+                });
+                const resTg = await rTg.json();
+                if (resTg.estado === "error") {
+                    return errorLoader(`Fallo al crear reporte en Telegram.<br><span style="font-size:11px;color:#ffb3b3;margin-top:10px;display:block;">Detalle: ${resTg.mensaje}</span>`);
+                }
+                if (resTg.threads) {
+                    hilosActivos = resTg.threads; // Memorizamos el ID del mensaje para este grupo
+                }
+            } catch(e) {
+                return errorLoader(`Fallo de conexión al servidor al crear el encabezado.`);
             }
-        } catch(e) {}
+        } else {
+            // Si hilosActivos existe, simplemente saltamos la creación y reutilizamos el hilo
+            mostrarLoader("Retomando Envío...");
+        }
 
         let contadoresSubida = { 'Foto': 0, 'Video': 0, 'Audio': 0 };
         
         if (archivosAEnviar.length > 0) {
             for(let i = 0; i < archivosAEnviar.length; i++) {
                 let item = archivosAEnviar[i];
-                actualizarUI({ progreso: Math.floor(((i)/archivosAEnviar.length)*80), mensaje: `Transmitiendo archivos ${i+1}/${archivosAEnviar.length}...` });
+                actualizarUI({ progreso: Math.floor(((i)/archivosAEnviar.length)*80), mensaje: `Subiendo archivo ${i+1} de ${archivosAEnviar.length}...` });
                 contadoresSubida[item.tipo]++;
                 
                 let nombreFinal = `${sigla}-${frente}-${ubicacion}-${fecha}_${modulo}_${item.tipo.toUpperCase()}${contadoresSubida[item.tipo]}.${item.extension}`;
@@ -1204,13 +1263,21 @@
                 try {
                     const r = await fetch(URL_APPS_SCRIPT, { 
                         method: 'POST', 
-                        body: JSON.stringify({ action: 'upload', base64: item.base64, nombre: nombreFinal, proyecto: proyectoElegido, modulo: modulo, frente: frente }) 
+                        body: JSON.stringify({ 
+                            action: 'upload', 
+                            base64: item.base64, 
+                            nombre: nombreFinal, 
+                            proyecto: proyectoElegido, 
+                            modulo: modulo, 
+                            frente: frente,
+                            threads: hilosActivos // V27: Pasamos el hilo guardado en memoria global
+                        }) 
                     });
                     const res = await r.json();
                     
                     if(res.estado !== 'exito') { 
                         errores++; 
-                        ultimoErrorTxt = res.mensaje || "Error desconocido."; 
+                        ultimoErrorTxt = res.mensaje || "Error."; 
                         item.hasFailed = true; 
                         archivosRestantesEnCola.push(item); 
                     }
@@ -1230,7 +1297,7 @@
         let subidosExito = archivosAEnviar.length - errores;
 
         if (subidosExito > 0) {
-            actualizarUI({ progreso: 90, mensaje: "Procesando Audios..." });
+            actualizarUI({ progreso: 90, mensaje: "Registrando trazabilidad..." });
             try { 
                 await fetch(URL_APPS_SCRIPT, { 
                     method: 'POST', 
@@ -1251,16 +1318,19 @@
 
         if(errores === 0) {
             let tgUrl = getTelegramGroupUrl(proyectoElegido, modulo);
-            let btnTelegramHTML = `<br><br><span style="color:var(--secondary); font-size:11px; font-family:'JetBrains Mono';">DATOS RECIBIDOS.</span><br><button class="btn-action btn-telegram" style="margin-top:10px;" onclick="abrirTelegram('${tgUrl}')">📡 ABRIR TELEGRAM (TG)</button>`;
+            let btnTelegramHTML = `<br><br><span style="color:#a0aec0; font-size:12px;">✅ Archivos enviados.</span><br><button class="btn-action btn-telegram" style="margin-top:10px;" onclick="abrirTelegram('${tgUrl}')">✈️ ABRIR GRUPO DE TELEGRAM</button>`;
             
             localStorage.removeItem('reporteDraft'); 
             document.getElementById('appUbicacion').value = ''; 
             document.getElementById('appDescripcion').value = '';
             
-            exitoLoader(`TRANSMISIÓN FINALIZADA.${btnTelegramHTML}`, 'vistaApp');
+            // V27: Al tener éxito total, reseteamos la memoria de los hilos para el siguiente reporte nuevo
+            hilosActivos = null;
+            
+            exitoLoader(`Reporte completado exitosamente.${btnTelegramHTML}`, 'vistaApp');
         } else {
-            let extraMsg = subidosExito > 0 ? `<br><br><span style="color:var(--primary); font-size:11px; font-family:'JetBrains Mono';">${subidosExito} ARCHIVOS RECIBIDOS. RESTO EN ESPERA.</span>` : '';
-            errorLoader(`FALLA EN ${errores} ARCHIVO(S).${extraMsg}<br><span style="font-size:10px;color:var(--accent);margin-top:10px;display:block;">${ultimoErrorTxt}</span>`);
+            let extraMsg = subidosExito > 0 ? `<br><br><span style="color:#00f260;">Se subieron ${subidosExito} archivo(s), el resto quedó pendiente.</span>` : '';
+            errorLoader(`Fallo en la subida de ${errores} archivo(s).${extraMsg}<br><span style="font-size:11px;color:#ffb3b3;margin-top:10px;display:block;">Detalle: ${ultimoErrorTxt}</span>`);
         }
     }
 
@@ -1273,7 +1343,7 @@
         const btn = document.getElementById("btnErrorLoader"); 
         btn.className = "btn-action btn-error"; 
         btn.style.background = ""; 
-        btn.innerHTML = "REGRESAR"; 
+        btn.innerHTML = "Cerrar y Revisar"; 
     }
 
     function mostrarLoader(titulo) {
@@ -1288,7 +1358,7 @@
       document.getElementById("loaderTitle").style.color = "white";
       
       let p = 2; 
-      actualizarUI({ progreso: p, mensaje: "Iniciando secuencia..." });
+      actualizarUI({ progreso: p, mensaje: "Conectando..." });
       
       simuladorEnMarcha = setInterval(() => { 
           if (p < 85) { 
@@ -1307,15 +1377,14 @@
         document.getElementById("vistaLoader").classList.remove("is-processing"); 
         
         const t = document.getElementById("loaderTitle"); 
-        t.innerHTML = "CARGUE EXITOSO"; 
-        t.style.color = "var(--primary)";
-        t.style.textShadow = "0 0 15px rgba(0,255,102,0.8)";
+        t.innerHTML = "¡Éxito! ✓"; 
+        t.style.color = "#00f260";
         
-        document.getElementById("progressBar").style.background = "var(--primary)";
+        document.getElementById("progressBar").style.background = "#00f260";
         
         const m = document.getElementById("message"); 
         clearInterval(m.scrambleInterval); 
-        m.style.color = "white"; 
+        m.style.color = "#00f260"; 
         m.innerHTML = html;
         
         const b = document.getElementById("btnExitoLoader"); 
@@ -1329,25 +1398,23 @@
       document.getElementById("vistaLoader").classList.remove("is-processing"); 
       
       const t = document.getElementById("loaderTitle"); 
-      t.innerHTML = "ERROR DE CONEXIÓN"; 
-      t.style.color = "var(--accent)";
-      t.style.textShadow = "0 0 15px rgba(255,0,85,0.8)";
+      t.innerHTML = "Fallo del Sistema ⚠️"; 
+      t.style.color = "#ff6b6b";
       
-      document.getElementById("progressBar").style.background = "var(--accent)"; 
-      document.getElementById("progressBar").innerHTML = "ERROR";
+      document.getElementById("progressBar").style.background = "#ff416c"; 
+      document.getElementById("progressBar").innerHTML = "Error";
       
       const m = document.getElementById("message"); 
       clearInterval(m.scrambleInterval); 
-      m.style.color = "white"; 
+      m.style.color = "#ff8787"; 
       m.innerHTML = `<b>${msgError}</b>`;
       
       resetBtnError(); 
       document.getElementById("btnErrorLoader").style.display = "flex";
     }
 
-    /* CORRECCIÓN: Ahora utilizamos ultimaVista para que no envíe forzosamente a vistaApp cuando falla el login */
     function volverDeError() { 
-        document.getElementById("message").style.color = "var(--primary)"; 
+        document.getElementById("message").style.color = "#00f260"; 
         document.getElementById("loginPassword").value = ''; 
         resetBtnError(); 
         cambiarVista(ultimaVista || 'vistaLogin'); 
@@ -1374,7 +1441,7 @@
         } 
     }
 
-    let appVersionActual = "1.0.4";
+    let appVersionActual = "1.0.5";
     
     window.addEventListener("DOMContentLoaded", () => { 
         const metaTag = document.querySelector('meta[name="app-version"]'); 
