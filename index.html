@@ -513,7 +513,7 @@
     <!-- NUEVO: CHECKBOX RETIE -->
     <div class="input-group" style="display: flex; align-items: center; gap: 10px; background: rgba(0, 204, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed rgba(0, 204, 255, 0.3); margin-bottom: 12px;">
         <input type="checkbox" id="appRetie" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);">
-        <label for="appRetie" style="margin: 0; color: white; font-size: 12px; cursor: pointer; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;">MARCAR COMO REGISTRO RETIE ⚡</label>
+        <label for="appRetie" style="margin: 0; color: white; font-size: 12px; cursor: pointer; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;">MARCAR COMO REGISTRO RETIE</label>
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
@@ -527,7 +527,7 @@
     <input type="file" id="inputGaleria" accept="image/*,video/*" multiple>
     <button class="btn-action btn-galeria" onclick="document.getElementById('inputGaleria').click()" style="margin-top: 0; margin-bottom: 12px;">📁 ADJUNTAR DESDE GALERÍA</button>
 
-    <button id="btnGrabarAudio" class="btn-action" style="margin-top: 0; border-color: #f59e0b; color: #f59e0b;">🎤 INICIAR TRANSMISIÓN VOCAL</button>
+    <button id="btnGrabarAudio" class="btn-action" style="margin-top: 0; border-color: #f59e0b; color: #f59e0b;">🎤 GRABAR AUDIO</button>
     
     <!-- Controles de Audio Holográficos -->
     <div id="audioControls" style="display: none; align-items: center; justify-content: center; gap: 20px; margin-top: 20px; margin-bottom: 10px; background: rgba(245, 158, 11, 0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.2);">
@@ -681,11 +681,9 @@
             errorLoader("Sin conexión al servidor."); 
         }
 
-        document.querySelectorAll('#vistaApp input, #vistaApp select, #vistaApp textarea').forEach(el => {
-            if(el.type !== 'file') { 
-                el.addEventListener('change', guardarDraft); 
-                el.addEventListener('input', guardarDraft); 
-            }
+        document.querySelectorAll('#vistaApp input:not([type="file"]), #vistaApp select, #vistaApp textarea').forEach(el => {
+            el.addEventListener('change', guardarDraft); 
+            el.addEventListener('input', guardarDraft); 
         });
     });
 
@@ -694,13 +692,9 @@
             proyecto: document.getElementById('appProyecto').value, 
             frente: document.getElementById('appFrente').value, 
             ubicacion: document.getElementById('appUbicacion').value, 
-            descripcion: document.getElementById('appDescripcion').value,
-            isRetie: document.getElementById('appRetie').checked // SE GUARDA EL DRAFT RETIE
+            descripcion: document.getElementById('appDescripcion').value 
         };
         localStorage.setItem('reporteDraft', JSON.stringify(draft));
-        
-        // Si el usuario cambia el proyecto, ubicación o texto, rompemos el hilo actual para que cree uno nuevo.
-        hilosActivos = null; 
     }
 
     function restaurarSesionYDraft() {
@@ -739,8 +733,6 @@
                 if (draft.frente) document.getElementById('appFrente').value = draft.frente;
                 document.getElementById('appUbicacion').value = draft.ubicacion || '';
                 document.getElementById('appDescripcion').value = draft.descripcion || '';
-                // RESTAURAR CHECKBOX RETIE
-                document.getElementById('appRetie').checked = draft.isRetie || false;
             } catch(e) {}
         } else { 
             selectProyecto.value = usuarioActual.proyecto; 
@@ -855,12 +847,10 @@
         localStorage.removeItem('reporteDraft');
         borrarArchivosDeIndexedDB(); 
         actualizarUICola();
-        
-        // Resetear variables al salir
-        hilosActivos = null; 
-        document.getElementById('appRetie').checked = false;
+        hilosActivos = null; // Limpiar memoria de telegram al salir
         
         ['appUbicacion','appDescripcion','loginPassword','appFrente'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('appRetie').checked = false;
         document.getElementById('badgeModulo').style.display = 'none'; 
         cambiarVista('vistaLogin');
     }
@@ -996,7 +986,7 @@
       } else {
         isRecording = false; 
         btnGrabarAudio.classList.remove('btn-audio-grabando'); 
-        btnGrabarAudio.innerHTML = "🎤 INICIAR TRANSMISIÓN VOCAL";
+        btnGrabarAudio.innerHTML = "🎤 GRABAR AUDIO";
         clearInterval(intervaloCronometro); 
         audioControls.style.display = 'none';
         
@@ -1030,7 +1020,7 @@
         return new Blob(mp3Data, { type: 'audio/mp3' });
     }
 
-    // FUNCIÓN PARA OPTIMIZAR FOTOGRAFÍAS AL VUELO SIN PERDER TAMAÑO
+    // V26: NUEVA FUNCIÓN PARA OPTIMIZAR FOTOGRAFÍAS AL VUELO SIN PERDER TAMAÑO
     function optimizarImagen(file) {
         return new Promise((resolve) => {
             if (!file.type.startsWith('image/')) return resolve(file);
@@ -1049,12 +1039,12 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0);
                         
-                        // Convertimos a JPEG al 85% de calidad
+                        // Convertimos a JPEG al 85% de calidad (Excelente equilibrio visual/peso)
                         canvas.toBlob((blob) => {
                             let nuevoNombre = file.name.replace(/\.[^/.]+$/, "") + ".jpeg";
                             resolve(new File([blob], nuevoNombre, { type: 'image/jpeg' }));
                         }, 'image/jpeg', 0.85); 
-                    }, 50); 
+                    }, 50); // Leve retraso para permitir actualizar la UI
                 };
             };
         });
@@ -1209,7 +1199,7 @@
         const frente = document.getElementById('appFrente').value.trim().toUpperCase();
         const ubicacion = document.getElementById('appUbicacion').value.trim().toUpperCase();
         const descripcion = document.getElementById('appDescripcion').value.trim();
-        const isRetie = document.getElementById('appRetie').checked; // OBTENER VALOR RETIE
+        const isRetie = document.getElementById('appRetie').checked;
         
         if(!proyectoElegido) return showToast("Definir PROYECTO OBJETIVO.");
         if(!frente) return showToast("Definir FRENTE.");
@@ -1221,6 +1211,8 @@
         const fecha = obtenerFechaFormateada(); 
         const modulo = usuarioActual.modulo || "OBRA";
 
+        mostrarLoader("ENLAZANDO CON CARPETAS...");
+        
         let archivosAEnviar = [...archivosQueue]; 
         let archivosRestantesEnCola = []; 
         let errores = 0; 
@@ -1233,9 +1225,10 @@
         
         let resumenText = `Total: ${contadoresTipo['Foto']} Visual, ${contadoresTipo['Video']} Cinético, ${contadoresTipo['Audio']} Voz.`;
 
-        // Solo enviamos un nuevo encabezado si no tenemos un hilo activo para esta sesión.
+        let hilosTelegram = {};
+
+        // V26: Creación del Encabezado (Omitir si se está reintentando con hilos guardados)
         if (!hilosActivos) {
-            mostrarLoader("ENLAZANDO CON CARPETAS...");
             try {
                 const rTg = await fetch(URL_APPS_SCRIPT, { 
                     method: 'POST', 
@@ -1248,7 +1241,7 @@
                         modulo: modulo, 
                         descripcion: descripcion, 
                         resumen: resumenText,
-                        isRetie: isRetie // ENVÍO DE FLAG RETIE
+                        isRetie: isRetie
                     }) 
                 });
                 const resTg = await rTg.json();
@@ -1256,55 +1249,65 @@
                     return errorLoader(`Falla de conexión.<br><span style="font-size:10px;color:var(--accent);margin-top:10px;display:block;">${resTg.mensaje}</span>`);
                 }
                 if (resTg.threads) {
-                    hilosActivos = resTg.threads; // Memorizamos el ID del mensaje para este grupo
+                    hilosTelegram = resTg.threads;
+                    hilosActivos = resTg.threads; // Memoriza para reintentos
                 }
             } catch(e) {
-                return errorLoader(`Fallo de conexión al servidor al crear el encabezado.`);
+                return errorLoader(`Falla de conexión con el servidor.`);
             }
         } else {
-            // Si hilosActivos existe, saltamos la creación y reutilizamos el hilo
-            mostrarLoader("RETOMANDO TRANSMISIÓN...");
+            // Reutilizar el hilo si estamos reintentando archivos que fallaron
+            hilosTelegram = hilosActivos;
         }
 
         let contadoresSubida = { 'Foto': 0, 'Video': 0, 'Audio': 0 };
+        let peticionesEnParalelo = [];
+        let archivosProcesados = 0;
         
+        // MAGIA: Ejecutar las subidas al mismo tiempo
         if (archivosAEnviar.length > 0) {
             for(let i = 0; i < archivosAEnviar.length; i++) {
                 let item = archivosAEnviar[i];
-                actualizarUI({ progreso: Math.floor(((i)/archivosAEnviar.length)*80), mensaje: `Transmitiendo archivos ${i+1}/${archivosAEnviar.length}...` });
                 contadoresSubida[item.tipo]++;
                 
                 let nombreFinal = `${sigla}-${frente}-${ubicacion}-${fecha}_${modulo}_${item.tipo.toUpperCase()}${contadoresSubida[item.tipo]}.${item.extension}`;
 
-                try {
-                    const r = await fetch(URL_APPS_SCRIPT, { 
-                        method: 'POST', 
-                        body: JSON.stringify({ 
-                            action: 'upload', 
-                            base64: item.base64, 
-                            nombre: nombreFinal, 
-                            proyecto: proyectoElegido, 
-                            modulo: modulo, 
-                            frente: frente,
-                            threads: hilosActivos, // Pasamos el hilo guardado en memoria global
-                            isRetie: isRetie // ENVÍO DE FLAG RETIE
-                        }) 
-                    });
-                    const res = await r.json();
-                    
-                    if(res.estado !== 'exito') { 
+                peticionesEnParalelo.push( (async () => {
+                    try {
+                        const r = await fetch(URL_APPS_SCRIPT, { 
+                            method: 'POST', 
+                            body: JSON.stringify({ 
+                                action: 'upload', 
+                                base64: item.base64, 
+                                nombre: nombreFinal, 
+                                proyecto: proyectoElegido, 
+                                modulo: modulo, 
+                                frente: frente,
+                                threads: hilosTelegram,
+                                isRetie: isRetie
+                            }) 
+                        });
+                        const res = await r.json();
+                        
+                        if(res.estado !== 'exito') { 
+                            errores++; 
+                            ultimoErrorTxt = res.mensaje || "Error desconocido."; 
+                            item.hasFailed = true; 
+                            archivosRestantesEnCola.push(item); 
+                        }
+                    } catch (e) { 
                         errores++; 
-                        ultimoErrorTxt = res.mensaje || "Error desconocido."; 
+                        ultimoErrorTxt = e.message || e.toString(); 
                         item.hasFailed = true; 
                         archivosRestantesEnCola.push(item); 
                     }
-                } catch (e) { 
-                    errores++; 
-                    ultimoErrorTxt = e.message || e.toString(); 
-                    item.hasFailed = true; 
-                    archivosRestantesEnCola.push(item); 
-                }
+                    archivosProcesados++;
+                    actualizarUI({ progreso: Math.floor((archivosProcesados/archivosAEnviar.length)*80), mensaje: `Transmitiendo archivos (${archivosProcesados}/${archivosAEnviar.length})...` });
+                })() );
             }
+            
+            // Esperamos que TODAS las peticiones se completen en paralelo
+            await Promise.all(peticionesEnParalelo);
         }
 
         archivosQueue = archivosRestantesEnCola; 
@@ -1342,8 +1345,7 @@
             document.getElementById('appDescripcion').value = '';
             document.getElementById('appRetie').checked = false;
             
-            // Al tener éxito total, reseteamos la memoria de los hilos para el siguiente reporte nuevo
-            hilosActivos = null;
+            hilosActivos = null; // Reiniciamos la memoria de los hilos para el siguiente reporte
             
             exitoLoader(`TRANSMISIÓN FINALIZADA.${btnTelegramHTML}`, 'vistaApp');
         } else {
