@@ -562,7 +562,6 @@
     
     // NUEVA VARIABLE GLOBAL PARA MEMORIZAR EL HILO DE TELEGRAM
     let hilosActivos = null; 
-    let currentReportId = Date.now().toString(); // ID único de Reporte (Para evadir duplicados)
     
     // UI Helpers (Toast System para reemplazar ALERTS)
     let toastTimeout;
@@ -849,7 +848,6 @@
         borrarArchivosDeIndexedDB(); 
         actualizarUICola();
         hilosActivos = null; // Limpiar memoria de telegram al salir
-        currentReportId = Date.now().toString(); // Reset ID
         
         ['appUbicacion','appDescripcion','loginPassword','appFrente'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('appRetie').checked = false;
@@ -1243,8 +1241,7 @@
                         modulo: modulo, 
                         descripcion: descripcion, 
                         resumen: resumenText,
-                        isRetie: isRetie,
-                        reportId: currentReportId // Adjuntamos el Ticket para proteger contra duplicados
+                        isRetie: isRetie
                     }) 
                 });
                 const resTg = await rTg.json();
@@ -1349,7 +1346,6 @@
             document.getElementById('appRetie').checked = false;
             
             hilosActivos = null; // Reiniciamos la memoria de los hilos para el siguiente reporte
-            currentReportId = Date.now().toString(); // Refrescamos el ID para habilitar un nuevo reporte
             
             exitoLoader(`TRANSMISIÓN FINALIZADA.${btnTelegramHTML}`, 'vistaApp');
         } else {
@@ -1435,26 +1431,14 @@
       m.style.color = "white"; 
       m.innerHTML = `<b>${msgError}</b>`;
       
-      // Mostrar botones de pop-up mejorados
-      document.getElementById("errorButtons").style.display = "grid";
-    }
-
-    function reintentarEnvio() {
-        document.getElementById("errorButtons").style.display = "none";
-        enviarReporteEnCola(); // Re-lanzar desde la ventana de carga!
+      resetBtnError(); 
+      document.getElementById("btnErrorLoader").style.display = "flex";
     }
 
     function volverDeError() { 
         document.getElementById("message").style.color = "var(--primary)"; 
         document.getElementById("loginPassword").value = ''; 
-        document.getElementById("errorButtons").style.display = "none"; 
-        
-        // Si regresan al formulario, limpiamos la sesión para crear un "Nuevo Registro"
-        if (ultimaVista === 'vistaApp') {
-            hilosActivos = null; 
-            currentReportId = Date.now().toString(); 
-        }
-        
+        resetBtnError(); 
         cambiarVista(ultimaVista || 'vistaLogin'); 
     }
 
